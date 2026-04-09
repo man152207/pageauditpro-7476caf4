@@ -93,6 +93,7 @@ serve(async (req) => {
       const scopes = [
         "pages_show_list",
         "pages_read_engagement",
+        "pages_manage_posts",
         "pages_read_user_content",
         "read_insights",
       ].join(",");
@@ -306,7 +307,7 @@ serve(async (req) => {
           page_id,
           page_name,
           access_token_encrypted: await encryptToken(access_token),
-          scopes: ["pages_show_list", "pages_read_engagement", "pages_read_user_content", "read_insights"],
+          scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "pages_read_user_content", "read_insights"],
           is_active: true,
           connected_at: new Date().toISOString(),
           token_expires_at: expires_in 

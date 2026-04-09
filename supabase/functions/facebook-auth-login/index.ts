@@ -39,7 +39,7 @@ async function savePages(
           page_id: page.id,
           page_name: page.name,
           access_token_encrypted: await encryptToken(page.access_token),
-          scopes: ["pages_show_list", "pages_read_engagement", "pages_read_user_content", "read_insights"],
+          scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "pages_read_user_content", "read_insights"],
           is_active: true,
           connected_at: new Date().toISOString(),
           token_expires_at: tokenExpiresIn
@@ -155,6 +155,7 @@ serve(async (req) => {
         "email",
         "pages_show_list",
         "pages_read_engagement",
+        "pages_manage_posts",
         "pages_read_user_content",
         "read_insights"
       ].join(",");
