@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAudit } from '@/hooks/useAudits';
+import { useAudit, useRunAudit } from '@/hooks/useAudits';
 import { useSubscription } from '@/hooks/useSubscription';
 import { usePdfExport } from '@/hooks/usePdfExport';
 import { Button } from '@/components/ui/button';
@@ -312,9 +312,13 @@ Powered by Pagelyzer
                   )}
                   <span className="hidden sm:inline">Export PDF</span>
                 </Button>
-                <Button size="sm">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Re-run</span>
+                <Button size="sm" onClick={handleRerun} disabled={isRerunning || !report?.fb_connection_id}>
+                  {isRerunning ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">{isRerunning ? 'Running...' : 'Re-run'}</span>
                 </Button>
               </>
             ) : (
