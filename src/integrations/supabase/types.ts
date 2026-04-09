@@ -198,6 +198,47 @@ export type Database = {
           },
         ]
       }
+      content_calendar: {
+        Row: {
+          color: string | null
+          created_at: string
+          date: string
+          id: string
+          scheduled_post_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          scheduled_post_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          scheduled_post_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_scheduled_post_id_fkey"
+            columns: ["scheduled_post_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fb_connections: {
         Row: {
           access_token_encrypted: string | null
@@ -508,6 +549,59 @@ export type Database = {
           },
         ]
       }
+      scheduled_posts: {
+        Row: {
+          content: string
+          created_at: string
+          error_message: string | null
+          fb_connection_id: string | null
+          id: string
+          media_urls: string[] | null
+          platform: string
+          published_at: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["post_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          error_message?: string | null
+          fb_connection_id?: string | null
+          id?: string
+          media_urls?: string[] | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          error_message?: string | null
+          fb_connection_id?: string | null
+          id?: string
+          media_urls?: string[] | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_fb_connection_id_fkey"
+            columns: ["fb_connection_id"]
+            isOneToOne: false
+            referencedRelation: "fb_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           created_at: string
@@ -670,6 +764,7 @@ export type Database = {
       audit_type: "manual" | "automatic"
       billing_type: "free" | "one_time" | "monthly" | "yearly"
       payment_status: "pending" | "completed" | "failed" | "refunded"
+      post_status: "draft" | "scheduled" | "published" | "failed"
       subscription_status: "active" | "cancelled" | "expired" | "pending"
     }
     CompositeTypes: {
@@ -802,6 +897,7 @@ export const Constants = {
       audit_type: ["manual", "automatic"],
       billing_type: ["free", "one_time", "monthly", "yearly"],
       payment_status: ["pending", "completed", "failed", "refunded"],
+      post_status: ["draft", "scheduled", "published", "failed"],
       subscription_status: ["active", "cancelled", "expired", "pending"],
     },
   },
