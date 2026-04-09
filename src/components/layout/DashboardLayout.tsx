@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   BarChart3,
+  CalendarDays,
   FileBarChart,
   GitCompare,
   History,
@@ -42,6 +43,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/audit', label: 'Run Audit', icon: Sparkles },
+  { href: '/dashboard/planner', label: 'Content Planner', icon: CalendarDays },
   { href: '/dashboard/reports', label: 'Reports', icon: FileBarChart },
   { href: '/dashboard/analytics', label: 'Analytics', icon: PieChart },
   { href: '/dashboard/compare', label: 'Compare', icon: GitCompare },

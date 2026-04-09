@@ -31,6 +31,7 @@ import FacebookPageCallback from "@/pages/callbacks/FacebookPageCallback";
 // Dashboard Pages
 import UserDashboard from "@/pages/dashboard/UserDashboard";
 import ManualAuditPage from "@/pages/dashboard/ManualAuditPage";
+import ContentPlannerPage from "@/pages/dashboard/ContentPlannerPage";
 import AuditReportPage from "@/pages/dashboard/AuditReportPage";
 import ReportsListPage from "@/pages/dashboard/ReportsListPage";
 import HistoryPage from "@/pages/dashboard/HistoryPage";
@@ -111,6 +112,7 @@ const App = () => (
             >
               <Route index element={<UserDashboard />} />
               <Route path="audit" element={<ManualAuditPage />} />
+              <Route path="planner" element={<ContentPlannerPage />} />
               <Route path="reports" element={<ReportsListPage />} />
               <Route path="reports/:auditId" element={<AuditReportPage />} />
               <Route path="analytics" element={<AuditAnalyticsPage />} />
