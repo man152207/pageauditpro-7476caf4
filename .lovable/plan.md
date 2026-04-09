@@ -1,70 +1,46 @@
 
 
-# Content Planner: Admin Features + Edge Function Error Fix
+# Fix: Edge Function CORS + Calendar Badge Warning
 
-## What We're Building
+## Root Cause
+The `schedule-post` edge function's CORS `Access-Control-Allow-Headers` only allows `authorization, x-client-info, apikey, content-type`, but the Supabase JS client v2.93+ sends additional headers like `x-supabase-client-platform`. The browser's preflight (OPTIONS) request gets rejected, causing "Failed to fetch".
 
-1. **Admin/Super Admin ले users को connected pages को लागि content plan गर्न सक्ने** — Admin ले सबै users को FB connections देख्न सक्ने, user select गर्ने, र तिनीहरूको page मा post schedule गर्ने
-2. **Calendar मा posts popup भएर देखिने** — Post card hover/click मा detailed popup preview
-3. **Edge function error fix** — `supabase.functions.invoke()` ले non-2xx status मा generic error throw गर्छ; response body बाट actual error message extract गर्ने
+The same issue exists in `publish-scheduled-posts`.
 
----
+## Fix
 
-## Changes
+### 1. Update CORS headers in both edge functions
 
-### 1. Admin User-Page Selector (ContentPlannerPage + PostComposer)
+**`supabase/functions/schedule-post/index.ts`** and **`supabase/functions/publish-scheduled-posts/index.ts`**:
 
-**`src/pages/dashboard/ContentPlannerPage.tsx`**:
-- Admin/Super Admin हो भने सबै users को FB connections fetch गर्ने (not just own)
-- User selector dropdown थप्ने — admin ले user choose गर्छ, त्यसको pages देखिन्छ
-- Selected user को `user_id` pass गर्ने PostComposer मा
-- Non-admin users ले आफ्नै connections मात्र देख्ने (existing behavior)
-
-**`src/components/planner/PostComposer.tsx`**:
-- Optional `targetUserId` prop accept गर्ने — admin ले अर्को user को behalf मा post बनाउँदा
-- Connection dropdown मा selected user को pages देखाउने
-
-**`src/hooks/useScheduledPosts.ts`**:
-- Admin/Super Admin हो भने optional `targetUserId` filter support गर्ने
-- Admin ले सबै posts वा specific user को posts हेर्न सक्ने
-
-### 2. Edge Function: Admin Support
-
-**`supabase/functions/schedule-post/index.ts`**:
-- Admin/Super Admin ले `target_user_id` field send गर्न सक्ने
-- Edge function मा role check गरेर admin भए `target_user_id` को behalf मा post create/update गर्ने
-- Non-admin ले `target_user_id` send गर्दा reject गर्ने
-
-### 3. Calendar Post Popup Preview
-
-**`src/components/planner/CalendarGrid.tsx`**:
-- Post card click मा detailed popup (Popover/HoverCard) देखाउने
-- Post content, status, scheduled time, page name, images preview
-- Edit र Delete buttons popup भित्र
-
-### 4. Edge Function Error Fix
-
-**`src/hooks/useScheduledPosts.ts`**:
-- `supabase.functions.invoke()` returns `{ data, error }` — when edge function returns non-2xx, `error` is generic but `data` contains the actual error body
-- Fix: Check `data?.error` first before checking `error`, extract meaningful message
-- Pattern: 
+Replace:
 ```typescript
-const { data, error } = await supabase.functions.invoke("schedule-post", { body });
-if (data?.error) throw new Error(data.error);
-if (error) throw error;
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 ```
-This is already done correctly in the hook. The real issue is likely that the edge function isn't deployed yet. We need to deploy it.
 
----
+With:
+```typescript
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+```
 
-## Files to Modify/Create
+### 2. Fix CalendarGrid Badge ref warning
+
+**`src/components/planner/CalendarGrid.tsx`**: The `PopoverTrigger asChild` passes a ref to `Badge`, which doesn't support `forwardRef`. Change the trigger from `Badge` to a native `<button>` element (already done correctly — the trigger is a `<button>`). The warning is actually from the `Badge` inside `PopoverContent`, not the trigger. No fix needed for functionality, but we can suppress it.
+
+### 3. Deploy edge functions
+
+Deploy both updated functions to resolve the CORS issue.
+
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/dashboard/ContentPlannerPage.tsx` | Add user selector for admins, fetch all connections |
-| `src/components/planner/PostComposer.tsx` | Accept `targetUserId` prop |
-| `src/hooks/useScheduledPosts.ts` | Add admin filtering support |
-| `src/components/planner/CalendarGrid.tsx` | Add post detail popup on click |
-| `supabase/functions/schedule-post/index.ts` | Support `target_user_id` for admins |
-| Deploy edge function | Fix "failed to send request" error |
+| `supabase/functions/schedule-post/index.ts` | Update CORS headers |
+| `supabase/functions/publish-scheduled-posts/index.ts` | Update CORS headers |
 
