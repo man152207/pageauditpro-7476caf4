@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.auto-audit-cron]
 verify_jwt = false
+
+[functions.schedule-post]
+verify_jwt = false
+
+[functions.publish-scheduled-posts]
+verify_jwt = false
