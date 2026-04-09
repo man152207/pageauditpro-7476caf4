@@ -92,8 +92,17 @@ serve(async (req) => {
       planId: plan?.id || null 
     });
 
-    // Determine if user is Pro (any paid plan)
-    const isPro = hasActiveSubscription && plan?.billing_type !== "free";
+    // Check if super_admin role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "super_admin")
+      .maybeSingle();
+    const isSuperAdmin = !!roleData;
+
+    // Determine if user is Pro (any paid plan or super_admin)
+    const isPro = isSuperAdmin || (hasActiveSubscription && plan?.billing_type !== "free");
 
     // Get plan features and limits
     const featureFlags = (plan?.feature_flags as Record<string, boolean>) || {};

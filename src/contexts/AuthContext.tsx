@@ -341,7 +341,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hasRole = (role: AppRole) => roles.includes(role);
   const isSuperAdmin = hasRole('super_admin');
   const isAdmin = hasRole('admin') || isSuperAdmin;
-  const isPro = (subscription?.subscribed === true && subscription?.plan?.billing_type !== 'free') 
+  const isPro = isSuperAdmin
+    || (subscription?.subscribed === true && subscription?.plan?.billing_type !== 'free') 
     || subscription?.hasFreeAuditGrant === true;
 
   return (

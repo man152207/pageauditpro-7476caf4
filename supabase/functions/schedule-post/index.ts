@@ -62,6 +62,15 @@ Deno.serve(async (req) => {
       }
 
       if (action === "create") {
+        // Check if super_admin (always Pro)
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "super_admin")
+          .maybeSingle();
+        const isSuperAdmin = !!roleData;
+
         // Check usage limits for non-pro users
         const { data: sub } = await supabase
           .from("subscriptions")
@@ -70,7 +79,7 @@ Deno.serve(async (req) => {
           .eq("status", "active")
           .maybeSingle();
 
-        const isPro = !!sub?.plans;
+        const isPro = isSuperAdmin || !!sub?.plans;
         if (!isPro) {
           const startOfMonth = new Date();
           startOfMonth.setDate(1);

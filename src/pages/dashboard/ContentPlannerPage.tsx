@@ -58,6 +58,7 @@ export default function ContentPlannerPage() {
     fb_connection_id?: string;
     scheduled_at?: string;
     status: string;
+    media_urls?: string[];
   }) => {
     if (editPost) {
       updatePost.mutate(

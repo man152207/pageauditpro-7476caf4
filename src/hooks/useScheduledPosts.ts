@@ -28,12 +28,13 @@ export function useScheduledPosts() {
   const postsQuery = useQuery({
     queryKey: ["scheduled-posts", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("schedule-post", {
-        body: { action: "list" },
-      });
+      const { data, error } = await supabase
+        .from("scheduled_posts")
+        .select("*, fb_connections(page_name)")
+        .eq("user_id", user!.id)
+        .order("scheduled_at", { ascending: true, nullsFirst: false });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return (data?.posts || []) as ScheduledPost[];
+      return (data || []) as ScheduledPost[];
     },
     enabled: !!user,
   });
