@@ -258,7 +258,7 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         title="PayPal"
         icon={<Wallet className="h-5 w-5 text-[#003087]" />}
         isConfigured={isConfigured('paypal_client_id')}
-        onSave={() => saveSettings([
+        onSave={() => saveAndClearDirty('paypal', [
           { key: 'paypal_client_id', value: settings.paypal_client_id || '', is_sensitive: false },
           { key: 'paypal_client_secret', value: settings.paypal_client_secret || '', is_sensitive: true },
           { key: 'paypal_sandbox_mode', value: settings.paypal_sandbox_mode || 'true', is_sensitive: false },
@@ -266,6 +266,7 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         saving={saving}
         onTest={() => testConnection('paypal')}
         testing={testing.paypal}
+        dirty={dirty.paypal}
       >
         <div className="p-3 rounded-lg bg-muted/50 text-sm mb-4">
           <p className="text-muted-foreground">
@@ -274,16 +275,19 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
               PayPal Developer Dashboard
             </a>
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            <strong>Important:</strong> Use Live credentials with Sandbox OFF, or Sandbox credentials with Sandbox ON.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Client ID</Label>
-            <Input value={settings.paypal_client_id || ''} onChange={(e) => updateSetting('paypal_client_id', e.target.value)} placeholder="PayPal Client ID" />
+            <Input value={settings.paypal_client_id || ''} onChange={(e) => trackDirty('paypal', 'paypal_client_id', e.target.value)} placeholder="PayPal Client ID" />
           </div>
-          <SecretInput id="paypal-secret" label="Client Secret" value={settings.paypal_client_secret || ''} onChange={(v) => updateSetting('paypal_client_secret', v)} helpText="From developer.paypal.com" />
+          <SecretInput id="paypal-secret" label="Client Secret" value={settings.paypal_client_secret || ''} onChange={(v) => trackDirty('paypal', 'paypal_client_secret', v)} helpText="From developer.paypal.com" />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <Switch checked={settings.paypal_sandbox_mode !== 'false'} onCheckedChange={(v) => updateSetting('paypal_sandbox_mode', String(v))} />
+          <Switch checked={settings.paypal_sandbox_mode !== 'false'} onCheckedChange={(v) => trackDirty('paypal', 'paypal_sandbox_mode', String(v))} />
           <Label>Sandbox Mode (Testing)</Label>
         </div>
       </IntegrationCard>
