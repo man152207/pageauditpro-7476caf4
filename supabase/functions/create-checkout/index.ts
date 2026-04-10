@@ -111,6 +111,27 @@ serve(async (req) => {
       );
     }
 
+    // Validate key format before using
+    if (!stripeSecretKey.startsWith("sk_live_") && !stripeSecretKey.startsWith("sk_test_")) {
+      const prefix = stripeSecretKey.substring(0, Math.min(8, stripeSecretKey.length));
+      console.error(`Invalid Stripe secret key format. Got prefix: ${prefix}...`);
+      return new Response(
+        JSON.stringify({
+          error: {
+            error_code: "STRIPE_INVALID_KEY_FORMAT",
+            human_message: `The stored Stripe key has an invalid format (starts with "${prefix}..."). It must start with sk_live_ or sk_test_.`,
+            fix_steps: [
+              "Go to Super Admin Settings → Integrations",
+              "Replace the Stripe Secret Key with the correct key from dashboard.stripe.com/apikeys (starts with sk_live_ or sk_test_)",
+            ],
+            is_config_issue: true,
+            missing_keys: ["stripe_secret_key"],
+          },
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const stripe = new Stripe(stripeSecretKey, { apiVersion: "2025-08-27.basil" });
 
     // Check for existing Stripe customer
