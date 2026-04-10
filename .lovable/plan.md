@@ -1,60 +1,42 @@
 
 
-# Content Planner Upgrade Plan
+# Pagelyzer Branding: Favicon + OG Image + Badge Cleanup
 
 ## Summary
-Three improvements to the Content Planner: searchable user selector, auto-publish toggle, and better calendar hover/popover.
+Generate Pagelyzer-branded favicon and OG/thumbnail image using AI image generation, replace all Lovable references, and hide the Lovable badge.
 
----
+## What Changes
 
-## Changes
+### 1. Generate Favicon (AI Image Generation)
+- Generate a simple, bold favicon icon using the Pagelyzer brand colors (Magenta/Purple `hsl(326, 55%, 42%)` + Green accent `hsl(86, 66%, 43%)`)
+- Design: A stylized "P" or bar-chart icon on a purple background — matches the `BarChart3` icon used throughout the app
+- Save as `public/favicon.png` (replace existing `favicon.ico`)
 
-### 1. Searchable User Selector
-**File: `src/pages/dashboard/ContentPlannerPage.tsx`**
-- Replace the current `<Select>` dropdown with a `Command`-based searchable combobox (using existing `command.tsx` + `popover.tsx` components)
-- Users can type to filter by name or email
-- Shows matching results in a scrollable list
+### 2. Generate OG/Thumbnail Image (AI Image Generation)  
+- Create a 1200x630 OG image with:
+  - Pagelyzer logo/brand name
+  - Tagline: "Smart Facebook Page Audit Platform"
+  - Purple-to-green gradient background matching brand colors
+- Save to `public/og-image.png`
 
-### 2. Auto-Publish Toggle
-**File: `src/pages/dashboard/ContentPlannerPage.tsx`**
-- Add a `Switch` toggle next to the user selector: **"Auto-publish posts"**
-- Default: ON (current behavior — posts with status "scheduled" get auto-published by the cron)
-- When OFF: posts are saved as "draft" only (content planning mode — no auto-publish)
-- This toggle controls the PostComposer behavior:
-  - When OFF: hide the "Schedule" button, only show "Save Plan" (saves as draft)
-  - When ON: show both "Save Draft" and "Schedule" as today
+### 3. Update index.html
+- Add `<link rel="icon" href="/favicon.png" type="image/png">`
+- Change `og:image` from `https://lovable.dev/opengraph-image-p98pqg.png` → `/og-image.png`
+- Change `twitter:image` similarly
+- Delete old `public/favicon.ico`
 
-**File: `src/components/planner/PostComposer.tsx`**
-- Accept new prop `autoPublish: boolean`
-- When `autoPublish` is false:
-  - Hide the "Schedule" button
-  - Change "Save Draft" to "Save Plan"
-  - Still allow setting a date (for planning purposes) but status stays "draft"
+### 4. Update Edge Functions (remove lovable.app references)
+- `send-pro-welcome-email/index.ts`: Change `pageauditpro.lovable.app` → `pagelyzer.io`
+- `send-audit-email/index.ts`: Change the `.lovable.app` fallback → `pagelyzer.io`
 
-### 3. Improved Calendar Hover/Popover
-**File: `src/components/planner/CalendarGrid.tsx`**
-- Increase popover width from `w-72` to `w-80`
-- Improve content display:
-  - Use `max-h-[200px] overflow-y-auto` for long content
-  - Better typography: slightly larger text, proper line-height
-  - Add a subtle header separator
-  - Show post date/time more prominently
-  - Increase truncation on calendar cell from 30 chars to show 2 lines with `line-clamp-2` instead of `truncate`
-- Calendar cell post items: change from single-line truncate to 2-line clamp for better readability
-
----
-
-## Technical Details
-
-- **No database changes needed** — the auto-publish toggle is purely UI logic. Posts saved as "draft" are already ignored by the `publish-scheduled-posts` cron function (it only processes status="scheduled").
-- **No edge function changes** — the existing `schedule-post` edge function already supports both "draft" and "scheduled" statuses.
-- The searchable user selector uses the existing `Command` component from shadcn/ui (already in the project at `src/components/ui/command.tsx`).
-- The `Switch` component already exists at `src/components/ui/switch.tsx`.
-
----
+### 5. Hide Lovable Badge
+- Use `publish_settings--set_badge_visibility` to hide the "Edit with Lovable" badge
 
 ## Files Modified
-1. `src/pages/dashboard/ContentPlannerPage.tsx` — searchable user picker + auto-publish toggle
-2. `src/components/planner/PostComposer.tsx` — accept `autoPublish` prop, adjust buttons
-3. `src/components/planner/CalendarGrid.tsx` — improved popover and cell content display
+1. `public/favicon.png` — new generated favicon
+2. `public/og-image.png` — new generated OG image
+3. `index.html` — updated meta tags + favicon link
+4. `supabase/functions/send-pro-welcome-email/index.ts` — fix URL
+5. `supabase/functions/send-audit-email/index.ts` — fix URL
+6. Delete `public/favicon.ico`
 
