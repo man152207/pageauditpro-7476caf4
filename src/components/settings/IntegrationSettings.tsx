@@ -113,10 +113,23 @@ interface IntegrationSettingsProps {
   saving: boolean;
 }
 
+function validateStripeSecretKey(key: string): { valid: boolean; error?: string } {
+  const trimmed = key.trim();
+  if (!trimmed || trimmed === '••••••••') return { valid: true };
+  if (trimmed.startsWith('pk_')) return { valid: false, error: 'This is a PUBLISHABLE key (pk_). Use the SECRET key (sk_live_... or sk_test_...).' };
+  if (trimmed.startsWith('whsec_')) return { valid: false, error: 'This is a webhook signing secret. Use the SECRET key (sk_live_... or sk_test_...).' };
+  if (trimmed.startsWith('rk_')) return { valid: false, error: 'This is a RESTRICTED key. Use the full Secret key (sk_live_... or sk_test_...).' };
+  if (trimmed.startsWith('mk_')) return { valid: false, error: 'Invalid key format (mk_). Use the SECRET key (sk_live_... or sk_test_...).' };
+  if (!trimmed.startsWith('sk_test_') && !trimmed.startsWith('sk_live_')) return { valid: false, error: `Invalid format. Key should start with sk_live_ or sk_test_, got: ${trimmed.substring(0, 8)}...` };
+  if (trimmed.length < 20) return { valid: false, error: 'Key appears too short. Copy the full key from Stripe Dashboard.' };
+  return { valid: true };
+}
+
 export function IntegrationSettings({ settings, updateSetting, saveSettings, saving }: IntegrationSettingsProps) {
   const { toast } = useToast();
   const [testing, setTesting] = useState<Record<string, boolean>>({});
   const [dirty, setDirty] = useState<Record<string, boolean>>({});
+  const [stripeKeyError, setStripeKeyError] = useState<string | undefined>();
 
   const trackDirty = (section: string, key: string, value: string) => {
     updateSetting(key, value);
@@ -207,13 +220,23 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         title="Stripe (Payments)"
         icon={<CreditCard className="h-5 w-5 text-[#635BFF]" />}
         isConfigured={isConfigured('stripe_secret_key')}
-        onSave={() => saveSettings([
-          { key: 'stripe_secret_key', value: settings.stripe_secret_key || '', is_sensitive: true },
-          { key: 'stripe_publishable_key', value: settings.stripe_publishable_key || '', is_sensitive: false },
-        ])}
+        onSave={() => {
+          const validation = validateStripeSecretKey(settings.stripe_secret_key || '');
+          if (!validation.valid) {
+            setStripeKeyError(validation.error);
+            toast({ title: 'Invalid Stripe Secret Key', description: validation.error, variant: 'destructive' });
+            return;
+          }
+          setStripeKeyError(undefined);
+          saveAndClearDirty('stripe', [
+            { key: 'stripe_secret_key', value: settings.stripe_secret_key || '', is_sensitive: true },
+            { key: 'stripe_publishable_key', value: settings.stripe_publishable_key || '', is_sensitive: false },
+          ]);
+        }}
         saving={saving}
         onTest={() => testConnection('stripe')}
         testing={testing.stripe}
+        dirty={dirty.stripe}
       >
         <div className="p-3 rounded-lg bg-muted/50 text-sm mb-4">
           <p className="text-muted-foreground">
@@ -224,19 +247,26 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <SecretInput 
-            id="stripe-secret" 
-            label="Secret Key" 
-            value={settings.stripe_secret_key || ''} 
-            onChange={(v) => updateSetting('stripe_secret_key', v)} 
-            placeholder="sk_live_..."
-            helpText="Starts with sk_live_ or sk_test_" 
-          />
+          <div>
+            <SecretInput 
+              id="stripe-secret" 
+              label="Secret Key" 
+              value={settings.stripe_secret_key || ''} 
+              onChange={(v) => {
+                trackDirty('stripe', 'stripe_secret_key', v);
+                const validation = validateStripeSecretKey(v);
+                setStripeKeyError(validation.valid ? undefined : validation.error);
+              }} 
+              placeholder="sk_live_..."
+              helpText="Starts with sk_live_ or sk_test_" 
+            />
+            {stripeKeyError && <p className="text-xs text-destructive mt-1">{stripeKeyError}</p>}
+          </div>
           <div className="space-y-2">
             <Label>Publishable Key</Label>
             <Input 
               value={settings.stripe_publishable_key || ''} 
-              onChange={(e) => updateSetting('stripe_publishable_key', e.target.value)} 
+              onChange={(e) => trackDirty('stripe', 'stripe_publishable_key', e.target.value)} 
               placeholder="pk_live_..." 
             />
             <p className="text-xs text-muted-foreground">For client-side Stripe.js (optional)</p>
