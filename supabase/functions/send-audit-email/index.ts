@@ -263,7 +263,7 @@ serve(async (req) => {
       );
     }
 
-    const baseUrl = Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app') || 'https://pagelyzer.io';
+    const baseUrl = 'https://pagelyzer.io';
     const unsubscribeUrl = `${baseUrl}/dashboard/settings?email=preferences&user=${userId}`;
 
     let subject = "";
