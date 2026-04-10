@@ -57,18 +57,34 @@ export default function ContentPlannerPage() {
   // Free user = not Pro and not admin
   const isFreeUser = !isPro && !canManageOthers;
 
-  // Fetch users list for admins
+  // Helper to persist selected user
+  const handleSelectUser = (userId: string | undefined) => {
+    setSelectedUserId(userId);
+    if (userId) {
+      localStorage.setItem('planner_selected_user', userId);
+    } else {
+      localStorage.removeItem('planner_selected_user');
+    }
+  };
+
+  // Fetch users list for admins (org-scoped for admins, all for super admins)
   useEffect(() => {
     if (!canManageOthers) return;
-    supabase
+    let query = supabase
       .from("profiles")
       .select("user_id, email, full_name")
       .eq("is_active", true)
-      .order("full_name")
-      .then(({ data }) => {
-        if (data) setUsers(data.map((p) => ({ id: p.user_id, email: p.email, full_name: p.full_name })));
-      });
-  }, [canManageOthers]);
+      .order("full_name");
+
+    // Admins only see their org users; super admins see all
+    if (isAdmin && !isSuperAdmin && profile?.organization_id) {
+      query = query.eq("organization_id", profile.organization_id);
+    }
+
+    query.then(({ data }) => {
+      if (data) setUsers(data.map((p) => ({ id: p.user_id, email: p.email, full_name: p.full_name })));
+    });
+  }, [canManageOthers, isAdmin, isSuperAdmin, profile?.organization_id]);
 
   // Fetch FB connections based on selected user (or own)
   useEffect(() => {
