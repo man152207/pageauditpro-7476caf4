@@ -92,6 +92,7 @@ export default function FeaturesPage() {
   return (
     <div className="py-16 sm:py-20 lg:py-24">
       <SEOHead />
+      <div className="container">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">
