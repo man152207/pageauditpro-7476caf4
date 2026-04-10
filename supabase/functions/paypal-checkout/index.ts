@@ -123,6 +123,21 @@ serve(async (req) => {
       );
     }
 
+    if (PAYPAL_CLIENT_ID === PAYPAL_CLIENT_SECRET) {
+      console.error("[PAYPAL] Client ID and Client Secret are identical");
+      return errorResponse(
+        'INVALID_CREDENTIALS',
+        'PayPal Client ID and Client Secret cannot be the same value. Paste the Secret Key from PayPal into the Client Secret field.',
+        [
+          'Open your PayPal app credentials',
+          'Copy the Secret Key, not the Client ID',
+          'Save settings before testing the connection'
+        ],
+        undefined,
+        400
+      );
+    }
+
     const baseUrl = PAYPAL_SANDBOX ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 
     // Action: Test Connection (for Super Admin integration settings)
