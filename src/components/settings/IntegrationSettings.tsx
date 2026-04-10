@@ -128,6 +128,31 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
     setDirty((prev) => ({ ...prev, [section]: false }));
   };
 
+  const hasMatchingPayPalCredentials = () => {
+    const clientId = settings.paypal_client_id?.trim();
+    const clientSecret = settings.paypal_client_secret?.trim();
+
+    if (!clientId || !clientSecret || clientSecret === '••••••••') {
+      return false;
+    }
+
+    return clientId === clientSecret;
+  };
+
+  const validatePayPalSettings = () => {
+    if (!hasMatchingPayPalCredentials()) {
+      return true;
+    }
+
+    toast({
+      title: 'Invalid PayPal configuration',
+      description: 'Client ID and Client Secret cannot be the same. Paste the Secret Key from PayPal into the Client Secret field.',
+      variant: 'destructive',
+    });
+
+    return false;
+  };
+
   const testConnection = async (type: string) => {
     setTesting((prev) => ({ ...prev, [type]: true }));
     try {
@@ -258,11 +283,14 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         title="PayPal"
         icon={<Wallet className="h-5 w-5 text-[#003087]" />}
         isConfigured={isConfigured('paypal_client_id')}
-        onSave={() => saveAndClearDirty('paypal', [
-          { key: 'paypal_client_id', value: settings.paypal_client_id || '', is_sensitive: false },
-          { key: 'paypal_client_secret', value: settings.paypal_client_secret || '', is_sensitive: true },
-          { key: 'paypal_sandbox_mode', value: settings.paypal_sandbox_mode || 'true', is_sensitive: false },
-        ])}
+        onSave={() => {
+          if (!validatePayPalSettings()) return;
+          void saveAndClearDirty('paypal', [
+            { key: 'paypal_client_id', value: settings.paypal_client_id || '', is_sensitive: false },
+            { key: 'paypal_client_secret', value: settings.paypal_client_secret || '', is_sensitive: true },
+            { key: 'paypal_sandbox_mode', value: settings.paypal_sandbox_mode || 'true', is_sensitive: false },
+          ]);
+        }}
         saving={saving}
         onTest={() => testConnection('paypal')}
         testing={testing.paypal}
@@ -286,6 +314,11 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
           </div>
           <SecretInput id="paypal-secret" label="Client Secret" value={settings.paypal_client_secret || ''} onChange={(v) => trackDirty('paypal', 'paypal_client_secret', v)} helpText="From developer.paypal.com" />
         </div>
+        {hasMatchingPayPalCredentials() && (
+          <p className="text-xs text-destructive">
+            Client ID and Client Secret cannot be identical. Copy the Secret Key from PayPal into the Client Secret field.
+          </p>
+        )}
         <div className="flex items-center gap-2 pt-2">
           <Switch checked={settings.paypal_sandbox_mode !== 'false'} onCheckedChange={(v) => trackDirty('paypal', 'paypal_sandbox_mode', String(v))} />
           <Label>Sandbox Mode (Testing)</Label>
