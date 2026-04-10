@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import type { ScheduledPost } from "@/hooks/useScheduledPosts";
 
 interface CalendarGridProps {
@@ -128,41 +129,58 @@ export function CalendarGrid({ posts, onDateClick, onPostClick, onDeletePost }: 
                           type="button"
                           onClick={(e) => e.stopPropagation()}
                           className={cn(
-                            "w-full text-left text-[10px] leading-tight px-1 py-0.5 rounded truncate block",
+                            "w-full text-left text-[10px] leading-snug px-1 py-0.5 rounded block",
                             p.status === "scheduled" && "bg-primary/10 text-primary",
                             p.status === "published" && "bg-green-500/10 text-green-700",
                             p.status === "failed" && "bg-destructive/10 text-destructive",
                             p.status === "draft" && "bg-muted text-muted-foreground"
                           )}
                         >
-                          {p.content.slice(0, 30) || "Untitled"}
+                          <span className="line-clamp-2">{p.content || "Untitled"}</span>
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-72 p-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="space-y-2">
+                      <PopoverContent className="w-80 p-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-3 space-y-3">
+                          {/* Header */}
                           <div className="flex items-center justify-between">
                             <Badge variant={sc.variant}>{sc.label}</Badge>
                             {p.fb_connections?.page_name && (
-                              <span className="text-xs text-muted-foreground">{p.fb_connections.page_name}</span>
+                              <span className="text-xs text-muted-foreground font-medium">{p.fb_connections.page_name}</span>
                             )}
                           </div>
-                          <p className="text-sm whitespace-pre-wrap break-words">{p.content || "No content"}</p>
+
+                          {p.scheduled_at && (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{new Date(p.scheduled_at).toLocaleString()}</span>
+                            </div>
+                          )}
+
+                          <Separator />
+
+                          {/* Content */}
+                          <div className="max-h-[200px] overflow-y-auto">
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                              {p.content || "No content"}
+                            </p>
+                          </div>
+
                           {p.media_urls && p.media_urls.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1.5">
                               {p.media_urls.map((url, idx) => (
-                                <img key={idx} src={url} alt="" className="w-12 h-12 rounded object-cover border" />
+                                <img key={idx} src={url} alt="" className="w-14 h-14 rounded object-cover border" />
                               ))}
                             </div>
                           )}
-                          {p.scheduled_at && (
-                            <p className="text-xs text-muted-foreground">
-                              Scheduled: {new Date(p.scheduled_at).toLocaleString()}
-                            </p>
-                          )}
+
                           {p.error_message && (
-                            <p className="text-xs text-destructive">{p.error_message}</p>
+                            <p className="text-xs text-destructive bg-destructive/10 rounded p-2">{p.error_message}</p>
                           )}
-                          <div className="flex gap-1 pt-1">
+
+                          <Separator />
+
+                          {/* Actions */}
+                          <div className="flex gap-1.5">
                             <Button size="sm" variant="outline" className="flex-1" onClick={() => onPostClick(p)}>
                               <Pencil className="h-3 w-3 mr-1" /> Edit
                             </Button>
