@@ -124,7 +124,7 @@ serve(async (req) => {
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://pageauditpro.lovable.app/dashboard" 
+    <a href="https://pagelyzer.io/dashboard" 
        style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #eab308 100%); color: white; text-decoration: none; padding: 15px 35px; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);">
       Start Using Pro Features →
     </a>
