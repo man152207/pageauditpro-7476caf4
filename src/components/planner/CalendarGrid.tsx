@@ -12,6 +12,7 @@ interface CalendarGridProps {
   onDateClick: (date: Date) => void;
   onPostClick: (post: ScheduledPost) => void;
   onDeletePost?: (id: string) => void;
+  readOnly?: boolean;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -23,7 +24,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
   failed: { label: "Failed", variant: "destructive" },
 };
 
-export function CalendarGrid({ posts, onDateClick, onPostClick, onDeletePost }: CalendarGridProps) {
+export function CalendarGrid({ posts, onDateClick, onPostClick, onDeletePost, readOnly }: CalendarGridProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const year = currentMonth.getFullYear();
@@ -106,10 +107,11 @@ export function CalendarGrid({ posts, onDateClick, onPostClick, onDeletePost }: 
             <div
               key={i}
               className={cn(
-                "min-h-[100px] border-b border-r p-1 cursor-pointer hover:bg-accent/30 transition-colors",
-                !isCurrentMonth && "bg-muted/10 opacity-50"
+                "min-h-[100px] border-b border-r p-1 transition-colors",
+                !isCurrentMonth && "bg-muted/10 opacity-50",
+                readOnly ? "cursor-default" : "cursor-pointer hover:bg-accent/30"
               )}
-              onClick={() => onDateClick(date)}
+              onClick={() => !readOnly && onDateClick(date)}
             >
               <div
                 className={cn(
@@ -177,19 +179,22 @@ export function CalendarGrid({ posts, onDateClick, onPostClick, onDeletePost }: 
                             <p className="text-xs text-destructive bg-destructive/10 rounded p-2">{p.error_message}</p>
                           )}
 
-                          <Separator />
-
-                          {/* Actions */}
-                          <div className="flex gap-1.5">
-                            <Button size="sm" variant="outline" className="flex-1" onClick={() => onPostClick(p)}>
-                              <Pencil className="h-3 w-3 mr-1" /> Edit
-                            </Button>
-                            {onDeletePost && (
-                              <Button size="sm" variant="destructive" className="flex-1" onClick={() => onDeletePost(p.id)}>
-                                <Trash2 className="h-3 w-3 mr-1" /> Delete
-                              </Button>
-                            )}
-                          </div>
+                          {/* Actions — hidden in readOnly mode */}
+                          {!readOnly && (
+                            <>
+                              <Separator />
+                              <div className="flex gap-1.5">
+                                <Button size="sm" variant="outline" className="flex-1" onClick={() => onPostClick(p)}>
+                                  <Pencil className="h-3 w-3 mr-1" /> Edit
+                                </Button>
+                                {onDeletePost && (
+                                  <Button size="sm" variant="destructive" className="flex-1" onClick={() => onDeletePost(p.id)}>
+                                    <Trash2 className="h-3 w-3 mr-1" /> Delete
+                                  </Button>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>
