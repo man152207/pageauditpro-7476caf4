@@ -71,17 +71,26 @@ serve(async (req) => {
   );
 
   try {
-    // Fetch PayPal credentials from settings
+    // Fetch PayPal credentials from settings (order by updated_at DESC for deterministic reads)
     const { data: settingsData } = await supabaseAdmin
       .from("settings")
       .select("key, value_encrypted")
       .eq("scope", "global")
-      .in("key", ["paypal_client_id", "paypal_client_secret", "paypal_sandbox_mode"]);
+      .in("key", ["paypal_client_id", "paypal_client_secret", "paypal_sandbox_mode"])
+      .order("updated_at", { ascending: false });
 
-    const settingsMap = new Map(settingsData?.map(s => [s.key, s.value_encrypted]) || []);
+    // Deduplicate: take only the first (latest) value per key
+    const settingsMap = new Map<string, string>();
+    for (const s of settingsData || []) {
+      if (!settingsMap.has(s.key)) {
+        settingsMap.set(s.key, s.value_encrypted || "");
+      }
+    }
     const PAYPAL_CLIENT_ID = settingsMap.get("paypal_client_id");
     const PAYPAL_CLIENT_SECRET = settingsMap.get("paypal_client_secret");
     const PAYPAL_SANDBOX = settingsMap.get("paypal_sandbox_mode") !== "false";
+
+    console.log("[PAYPAL] Mode:", PAYPAL_SANDBOX ? "sandbox" : "live", "| Client ID prefix:", PAYPAL_CLIENT_ID?.substring(0, 8));
 
     // Validate PayPal configuration
     if (!PAYPAL_CLIENT_ID || PAYPAL_CLIENT_ID === "••••••••") {
@@ -135,11 +144,15 @@ serve(async (req) => {
         }
       } catch (error: unknown) {
         const errMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.error("[PAYPAL] Connection test failed:", errMsg);
+        console.error("[PAYPAL] Connection test failed:", errMsg, "| mode:", PAYPAL_SANDBOX ? "sandbox" : "live");
         return errorResponse(
           'INVALID_CREDENTIALS',
-          'PayPal credentials are invalid.',
-          ['Check your Client ID and Client Secret', 'Ensure credentials match the selected mode (sandbox/live)'],
+          `PayPal credentials are invalid. Current mode: ${PAYPAL_SANDBOX ? 'Sandbox' : 'Live'}. Make sure your credentials match this mode.`,
+          [
+            `You are in ${PAYPAL_SANDBOX ? 'SANDBOX' : 'LIVE'} mode`,
+            'Check your Client ID and Client Secret match this mode',
+            'Save settings before testing the connection',
+          ],
           undefined,
           400
         );

@@ -34,14 +34,19 @@ export default function IntegrationsSettings() {
       const { data, error } = await supabase
         .from('settings')
         .select('key, value_encrypted, is_sensitive')
-        .eq('scope', 'global');
+        .eq('scope', 'global')
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
       if (data) {
         const newSettings = { ...settings };
+        const seen = new Set<string>();
         data.forEach((item) => {
           const key = item.key as keyof typeof settings;
+          // Skip duplicates — first row is latest due to ORDER BY
+          if (seen.has(key)) return;
+          seen.add(key);
           if (key in newSettings) {
             if (item.is_sensitive && item.value_encrypted) {
               newSettings[key] = '••••••••';
@@ -72,17 +77,23 @@ export default function IntegrationsSettings() {
           continue;
         }
 
+        // Delete existing then insert to avoid NULL upsert issues
+        await supabase
+          .from('settings')
+          .delete()
+          .eq('scope', 'global')
+          .is('scope_id', null)
+          .eq('key', setting.key);
+
         const { error } = await supabase
           .from('settings')
-          .upsert({
+          .insert({
             scope: 'global',
             scope_id: null,
             key: setting.key,
             value_encrypted: setting.value,
             is_sensitive: setting.is_sensitive,
             updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'scope,scope_id,key',
           });
 
         if (error) throw error;
