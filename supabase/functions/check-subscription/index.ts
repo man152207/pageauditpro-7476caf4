@@ -126,15 +126,15 @@ serve(async (req) => {
     // Check for free audit grant for this month
     const monthStr = startOfMonth.toISOString().split('T')[0];
 
-    const { data: freeGrant } = await supabase
+    const { data: freeGrants } = await supabase
       .from("free_audit_grants")
-      .select("id")
+      .select("id, grant_month")
       .eq("user_id", userId)
-      .eq("grant_month", monthStr)
-      .maybeSingle();
+      .or(`grant_month.eq.${monthStr},grant_month.eq.9999-01-01`);
 
-    const hasFreeAuditGrant = !!freeGrant;
-    logStep("Free audit grant check", { hasFreeAuditGrant, month: monthStr });
+    const hasFreeAuditGrant = !!(freeGrants && freeGrants.length > 0);
+    const hasLifetimeGrant = !!(freeGrants && freeGrants.some((g: any) => g.grant_month === '9999-01-01'));
+    logStep("Free audit grant check", { hasFreeAuditGrant, hasLifetimeGrant, month: monthStr });
 
     // For users with free audit grants, show unlimited audits
     const usageStats = hasFreeAuditGrant ? {

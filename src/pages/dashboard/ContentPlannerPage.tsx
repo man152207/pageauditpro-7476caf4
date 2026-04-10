@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
-import { Plus, List, CalendarDays, Loader2, Users, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, List, CalendarDays, Loader2, Users, Check, ChevronsUpDown, Lock, Globe, Info } from "lucide-react";
 import { CalendarGrid } from "@/components/planner/CalendarGrid";
 import { PostComposer } from "@/components/planner/PostComposer";
 import { PostCard } from "@/components/planner/PostCard";
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface FBConnection {
@@ -46,6 +47,10 @@ export default function ContentPlannerPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [editPost, setEditPost] = useState<ScheduledPost | null>(null);
   const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [orgName, setOrgName] = useState<string | null>(null);
+
+  // Free user = not Pro and not admin
+  const isFreeUser = !isPro && !canManageOthers;
 
   // Fetch users list for admins
   useEffect(() => {
@@ -75,6 +80,28 @@ export default function ContentPlannerPage() {
       });
   }, [user, selectedUserId, canManageOthers]);
 
+  // Fetch org name for service notice
+  useEffect(() => {
+    if (!isFreeUser || !user?.id) return;
+    supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.organization_id) {
+          supabase
+            .from("organizations")
+            .select("name")
+            .eq("id", data.organization_id)
+            .maybeSingle()
+            .then(({ data: org }) => {
+              if (org?.name) setOrgName(org.name);
+            });
+        }
+      });
+  }, [isFreeUser, user?.id]);
+
   const selectedUserLabel = useMemo(() => {
     if (!selectedUserId) return "My Posts";
     const u = users.find((u) => u.id === selectedUserId);
@@ -82,12 +109,14 @@ export default function ContentPlannerPage() {
   }, [selectedUserId, users]);
 
   const handleDateClick = (date: Date) => {
+    if (isFreeUser) return; // View-only for free users
     setSelectedDate(date);
     setEditPost(null);
     setComposerOpen(true);
   };
 
   const handlePostClick = (post: ScheduledPost) => {
+    if (isFreeUser) return; // View-only for free users
     setEditPost(post);
     setSelectedDate(undefined);
     setComposerOpen(true);
@@ -139,9 +168,12 @@ export default function ContentPlannerPage() {
           title="Content Planner"
           description="Plan, schedule, and auto-publish posts to your Facebook pages."
         />
-        <Button onClick={() => { setEditPost(null); setSelectedDate(undefined); setComposerOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1" /> New Post
-        </Button>
+        {/* Hide New Post button for free users */}
+        {!isFreeUser && (
+          <Button onClick={() => { setEditPost(null); setSelectedDate(undefined); setComposerOpen(true); }}>
+            <Plus className="h-4 w-4 mr-1" /> New Post
+          </Button>
+        )}
       </div>
 
       {/* Admin: User selector + Auto-publish toggle */}
@@ -223,13 +255,57 @@ export default function ContentPlannerPage() {
         </Card>
       )}
 
-      {!isPro && !canManageOthers && (
-        <Alert>
-          <AlertDescription>
-            Free plan: {3 - stats.total > 0 ? 3 - stats.total : 0} posts remaining this month.
-            Upgrade to Pro for unlimited scheduling.
-          </AlertDescription>
-        </Alert>
+      {/* Free user notices */}
+      {isFreeUser && (
+        <div className="space-y-3">
+          <Alert>
+            <AlertDescription>
+              <strong>Free plan:</strong> {3 - stats.total > 0 ? 3 - stats.total : 0} posts remaining this month.
+              Upgrade to Pro for unlimited scheduling.
+            </AlertDescription>
+          </Alert>
+
+          {/* Service notice — shown when free user has posts (managed by admin/agency) */}
+          {posts.length > 0 && (
+            <Alert className="border-primary/20 bg-primary/5">
+              <Info className="h-4 w-4 text-primary" />
+              <AlertDescription className="text-sm">
+                📋 <strong>{orgName || "Your service provider"}</strong> is managing your content calendar.
+                You can view your scheduled posts below. Upgrade to Pro for full editing access.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Auto-publish toggle — disabled for free users */}
+          <Card>
+            <CardContent className="pt-3 pb-3 px-4">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-muted-foreground">Auto-publish</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2">
+                        <Switch disabled checked={false} />
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Available on Pro plan</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Connected Pages Info */}
+      {connections.length > 0 && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Globe className="h-4 w-4" />
+          <span>
+            Connected Pages: {connections.map((c) => c.page_name).join(", ")} ({connections.length} {connections.length === 1 ? "page" : "pages"})
+          </span>
+        </div>
       )}
 
       {/* Stats */}
@@ -266,7 +342,8 @@ export default function ContentPlannerPage() {
             posts={posts}
             onDateClick={handleDateClick}
             onPostClick={handlePostClick}
-            onDeletePost={handleDeletePost}
+            onDeletePost={isFreeUser ? undefined : handleDeletePost}
+            readOnly={isFreeUser}
           />
         </TabsContent>
 
@@ -275,29 +352,33 @@ export default function ContentPlannerPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No posts yet. Create your first post!</p>
+                <p className="text-muted-foreground">
+                  {isFreeUser ? "No posts scheduled yet." : "No posts yet. Create your first post!"}
+                </p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => (
-                <PostCard key={post.id} post={post} onClick={() => handlePostClick(post)} />
+                <PostCard key={post.id} post={post} onClick={isFreeUser ? undefined : () => handlePostClick(post)} />
               ))}
             </div>
           )}
         </TabsContent>
       </Tabs>
 
-      <PostComposer
-        open={composerOpen}
-        onOpenChange={setComposerOpen}
-        onSubmit={handleSubmit}
-        connections={connections}
-        isSubmitting={createPost.isPending || updatePost.isPending}
-        initialDate={selectedDate}
-        editPost={editPost}
-        autoPublish={autoPublish}
-      />
+      {!isFreeUser && (
+        <PostComposer
+          open={composerOpen}
+          onOpenChange={setComposerOpen}
+          onSubmit={handleSubmit}
+          connections={connections}
+          isSubmitting={createPost.isPending || updatePost.isPending}
+          initialDate={selectedDate}
+          editPost={editPost}
+          autoPublish={autoPublish}
+        />
+      )}
     </div>
   );
 }

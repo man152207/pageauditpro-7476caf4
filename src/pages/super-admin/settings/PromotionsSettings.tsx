@@ -6,23 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Gift, Loader2, Plus, Trash2, Search, Users } from 'lucide-react';
+import { Gift, Loader2, Plus, Trash2, Search, Users, Infinity } from 'lucide-react';
 import { format, startOfMonth, addMonths } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+
+const LIFETIME_SENTINEL = '9999-01-01';
 
 interface FreeAuditGrant {
   id: string;
@@ -52,14 +46,26 @@ export default function PromotionsSettings() {
   const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>('');
 
-  // Generate month options (current month + next 12 months)
-  const monthOptions = Array.from({ length: 13 }, (_, i) => {
-    const date = addMonths(startOfMonth(new Date()), i);
-    return {
-      value: format(date, 'yyyy-MM-dd'),
-      label: format(date, 'MMMM yyyy'),
-    };
-  });
+  // Generate month options (current month + next 12 months) + Lifetime
+  const monthOptions = [
+    { value: LIFETIME_SENTINEL, label: '♾️ Lifetime' },
+    ...Array.from({ length: 13 }, (_, i) => {
+      const date = addMonths(startOfMonth(new Date()), i);
+      return {
+        value: format(date, 'yyyy-MM-dd'),
+        label: format(date, 'MMMM yyyy'),
+      };
+    }),
+  ];
+
+  const getGrantLabel = (grantMonth: string) => {
+    if (grantMonth === LIFETIME_SENTINEL) return 'Lifetime';
+    try {
+      return format(new Date(grantMonth), 'MMMM yyyy');
+    } catch {
+      return grantMonth;
+    }
+  };
 
   useEffect(() => {
     fetchGrants();
@@ -67,7 +73,6 @@ export default function PromotionsSettings() {
 
   const fetchGrants = async () => {
     try {
-      // Fetch grants with user info
       const { data: grantsData, error } = await supabase
         .from('free_audit_grants')
         .select('*')
@@ -75,7 +80,6 @@ export default function PromotionsSettings() {
 
       if (error) throw error;
 
-      // Get user emails for each grant
       if (grantsData && grantsData.length > 0) {
         const userIds = [...new Set(grantsData.map(g => g.user_id))];
         const { data: profiles } = await supabase
@@ -95,11 +99,7 @@ export default function PromotionsSettings() {
         setGrants([]);
       }
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,6 @@ export default function PromotionsSettings() {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-
     setSearching(true);
     try {
       const { data, error } = await supabase
@@ -117,18 +116,11 @@ export default function PromotionsSettings() {
         .limit(10);
 
       if (error) throw error;
-
       setSearchResults(data?.map(p => ({
-        id: p.user_id,
-        email: p.email || '',
-        full_name: p.full_name,
+        id: p.user_id, email: p.email || '', full_name: p.full_name,
       })) || []);
     } catch (error: any) {
-      toast({
-        title: 'Search Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Search Failed', description: error.message, variant: 'destructive' });
     } finally {
       setSearching(false);
     }
@@ -136,11 +128,7 @@ export default function PromotionsSettings() {
 
   const handleGrantFreeAudits = async () => {
     if (!selectedUser || !selectedMonth) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please select a user and month.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Missing Information', description: 'Please select a user and month.', variant: 'destructive' });
       return;
     }
 
@@ -156,28 +144,27 @@ export default function PromotionsSettings() {
 
       if (error) {
         if (error.code === '23505') {
-          throw new Error('This user already has free audits for this month.');
+          throw new Error('This user already has free audits for this period.');
         }
         throw error;
       }
 
+      const periodLabel = selectedMonth === LIFETIME_SENTINEL
+        ? 'Lifetime access'
+        : monthOptions.find(m => m.value === selectedMonth)?.label || selectedMonth;
+
       toast({
         title: 'Grant Created',
-        description: `${selectedUser.email} now has free audits for ${monthOptions.find(m => m.value === selectedMonth)?.label}.`,
+        description: `${selectedUser.email} now has free audits — ${periodLabel}.`,
       });
 
-      // Reset form and refresh
       setSelectedUser(null);
       setSelectedMonth('');
       setSearchQuery('');
       setSearchResults([]);
       await fetchGrants();
     } catch (error: any) {
-      toast({
-        title: 'Failed to Create Grant',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Failed to Create Grant', description: error.message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -185,25 +172,12 @@ export default function PromotionsSettings() {
 
   const handleRemoveGrant = async (grantId: string) => {
     try {
-      const { error } = await supabase
-        .from('free_audit_grants')
-        .delete()
-        .eq('id', grantId);
-
+      const { error } = await supabase.from('free_audit_grants').delete().eq('id', grantId);
       if (error) throw error;
-
-      toast({
-        title: 'Grant Removed',
-        description: 'The free audit grant has been removed.',
-      });
-
+      toast({ title: 'Grant Removed', description: 'The free audit grant has been removed.' });
       await fetchGrants();
     } catch (error: any) {
-      toast({
-        title: 'Failed to Remove',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Failed to Remove', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -217,7 +191,6 @@ export default function PromotionsSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Grant Free Audits Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -225,11 +198,10 @@ export default function PromotionsSettings() {
             Grant Free Audits
           </CardTitle>
           <CardDescription>
-            Give a user unlimited free audits for a specific month. This is a hidden feature not visible to regular users.
+            Give a user unlimited free audits for a specific month or lifetime. This is a hidden feature not visible to regular users.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* User Search */}
           <div className="space-y-2">
             <Label>Search User by Email</Label>
             <div className="flex gap-2">
@@ -249,58 +221,42 @@ export default function PromotionsSettings() {
             </div>
           </div>
 
-          {/* Search Results */}
           {searchResults.length > 0 && !selectedUser && (
             <div className="border rounded-lg divide-y max-h-48 overflow-auto">
               {searchResults.map((result) => (
                 <button
                   key={result.id}
-                  onClick={() => {
-                    setSelectedUser(result);
-                    setSearchResults([]);
-                  }}
+                  onClick={() => { setSelectedUser(result); setSearchResults([]); }}
                   className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-center gap-3"
                 >
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="font-medium">{result.email}</p>
-                    {result.full_name && (
-                      <p className="text-sm text-muted-foreground">{result.full_name}</p>
-                    )}
+                    {result.full_name && <p className="text-sm text-muted-foreground">{result.full_name}</p>}
                   </div>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Selected User */}
           {selectedUser && (
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-3">
                 <Users className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">{selectedUser.email}</p>
-                  {selectedUser.full_name && (
-                    <p className="text-sm text-muted-foreground">{selectedUser.full_name}</p>
-                  )}
+                  {selectedUser.full_name && <p className="text-sm text-muted-foreground">{selectedUser.full_name}</p>}
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedUser(null)}
-              >
-                Change
-              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>Change</Button>
             </div>
           )}
 
-          {/* Month Selection */}
           <div className="space-y-2">
-            <Label>Free Audit Month</Label>
+            <Label>Free Audit Period</Label>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger>
-                <SelectValue placeholder="Select month..." />
+                <SelectValue placeholder="Select period..." />
               </SelectTrigger>
               <SelectContent>
                 {monthOptions.map((option) => (
@@ -312,29 +268,17 @@ export default function PromotionsSettings() {
             </Select>
           </div>
 
-          {/* Submit Button */}
-          <Button
-            onClick={handleGrantFreeAudits}
-            disabled={!selectedUser || !selectedMonth || saving}
-            className="w-full"
-          >
-            {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="mr-2 h-4 w-4" />
-            )}
+          <Button onClick={handleGrantFreeAudits} disabled={!selectedUser || !selectedMonth || saving} className="w-full">
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
             Grant Free Audits
           </Button>
         </CardContent>
       </Card>
 
-      {/* Active Grants */}
       <Card>
         <CardHeader>
           <CardTitle>Active Grants</CardTitle>
-          <CardDescription>
-            Users with free audit access for specific months.
-          </CardDescription>
+          <CardDescription>Users with free audit access for specific months or lifetime.</CardDescription>
         </CardHeader>
         <CardContent>
           {grants.length === 0 ? (
@@ -346,7 +290,7 @@ export default function PromotionsSettings() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Month</TableHead>
+                  <TableHead>Period</TableHead>
                   <TableHead>Granted</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -356,7 +300,13 @@ export default function PromotionsSettings() {
                   <TableRow key={grant.id}>
                     <TableCell className="font-medium">{grant.user_email}</TableCell>
                     <TableCell>
-                      {format(new Date(grant.grant_month), 'MMMM yyyy')}
+                      {grant.grant_month === LIFETIME_SENTINEL ? (
+                        <Badge variant="default" className="gap-1">
+                          <Infinity className="h-3 w-3" /> Lifetime
+                        </Badge>
+                      ) : (
+                        getGrantLabel(grant.grant_month)
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(grant.created_at), 'MMM d, yyyy')}

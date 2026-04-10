@@ -91,14 +91,13 @@ serve(async (req) => {
     startOfMonth.setHours(0, 0, 0, 0);
     const monthStr = startOfMonth.toISOString().split('T')[0];
 
-    const { data: freeGrant } = await supabase
+    const { data: freeGrants } = await supabase
       .from("free_audit_grants")
-      .select("id")
+      .select("id, grant_month")
       .eq("user_id", userId)
-      .eq("grant_month", monthStr)
-      .maybeSingle();
+      .or(`grant_month.eq.${monthStr},grant_month.eq.9999-01-01`);
 
-    const hasFreeAuditGrant = !!freeGrant;
+    const hasFreeAuditGrant = !!(freeGrants && freeGrants.length > 0);
     logStep("Free audit grant check", { hasFreeAuditGrant, month: monthStr });
 
     // User has Pro access if: currently subscribed OR this specific audit was unlocked OR has free grant
