@@ -23,6 +23,8 @@ import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import DataDeletionPage from "@/pages/DataDeletionPage";
 import PublicReportPage from "@/pages/PublicReportPage";
 import NotFound from "@/pages/NotFound";
+import BlogListPage from "@/pages/BlogListPage";
+import BlogPostPage from "@/pages/BlogPostPage";
 
 // OAuth Callback Pages
 import FacebookLoginCallback from "@/pages/callbacks/FacebookLoginCallback";
@@ -62,6 +64,8 @@ import WebhooksSettings from "@/pages/super-admin/settings/WebhooksSettings";
 import SEOSettings from "@/pages/super-admin/settings/SEOSettings";
 import SecuritySettings from "@/pages/super-admin/settings/SecuritySettings";
 import PromotionsSettings from "@/pages/super-admin/settings/PromotionsSettings";
+import PageSEOSettings from "@/pages/super-admin/settings/PageSEOSettings";
+import BlogManagementPage from "@/pages/super-admin/BlogManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +100,8 @@ const App = () => (
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
               <Route path="/data-deletion" element={<DataDeletionPage />} />
+              <Route path="/blog" element={<BlogListPage />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
               {/* Legacy routes - redirect to new paths */}
               <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
               <Route path="/terms" element={<Navigate to="/terms-of-service" replace />} />
@@ -165,7 +171,9 @@ const App = () => (
                 <Route path="seo" element={<SEOSettings />} />
                 <Route path="security" element={<SecuritySettings />} />
                 <Route path="promotions" element={<PromotionsSettings />} />
+                <Route path="page-seo" element={<PageSEOSettings />} />
               </Route>
+              <Route path="blog" element={<BlogManagementPage />} />
             </Route>
 
             {/* 404 */}
