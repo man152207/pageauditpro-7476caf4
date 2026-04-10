@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, Send, Save, ImagePlus, X, Loader2 } from "lucide-react";
+import { Calendar, Clock, Send, Save, ImagePlus, X, Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -35,6 +35,7 @@ interface PostComposerProps {
     status: string;
     media_urls?: string[] | null;
   } | null;
+  autoPublish?: boolean;
 }
 
 export function PostComposer({
@@ -45,6 +46,7 @@ export function PostComposer({
   isSubmitting,
   initialDate,
   editPost,
+  autoPublish = true,
 }: PostComposerProps) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
@@ -117,7 +119,11 @@ export function PostComposer({
             {editPost ? "Edit Post" : "Create Post"}
           </DialogTitle>
           <DialogDescription>
-            {editPost ? "Update your scheduled post details." : "Create a new post to schedule or save as draft."}
+            {editPost
+              ? "Update your scheduled post details."
+              : autoPublish
+              ? "Create a new post to schedule or save as draft."
+              : "Plan content for your calendar. Posts will not be auto-published."}
           </DialogDescription>
         </DialogHeader>
 
@@ -194,7 +200,7 @@ export function PostComposer({
 
           <div>
             <Label htmlFor="schedule" className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" /> Schedule Date & Time
+              <Clock className="h-3.5 w-3.5" /> {autoPublish ? "Schedule Date & Time" : "Planned Date & Time"}
             </Label>
             <Input
               id="schedule"
@@ -206,19 +212,30 @@ export function PostComposer({
           </div>
 
           <div className="flex gap-2 justify-end pt-2">
-            <Button
-              variant="outline"
-              onClick={() => handleSubmit("draft")}
-              disabled={isSubmitting || !content.trim() || uploading}
-            >
-              <Save className="h-4 w-4 mr-1" /> Save Draft
-            </Button>
-            <Button
-              onClick={() => handleSubmit("scheduled")}
-              disabled={isSubmitting || !content.trim() || !scheduledDate || !connectionId || uploading}
-            >
-              <Send className="h-4 w-4 mr-1" /> Schedule
-            </Button>
+            {autoPublish ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("draft")}
+                  disabled={isSubmitting || !content.trim() || uploading}
+                >
+                  <Save className="h-4 w-4 mr-1" /> Save Draft
+                </Button>
+                <Button
+                  onClick={() => handleSubmit("scheduled")}
+                  disabled={isSubmitting || !content.trim() || !scheduledDate || !connectionId || uploading}
+                >
+                  <Send className="h-4 w-4 mr-1" /> Schedule
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => handleSubmit("draft")}
+                disabled={isSubmitting || !content.trim() || uploading}
+              >
+                <FileText className="h-4 w-4 mr-1" /> Save Plan
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

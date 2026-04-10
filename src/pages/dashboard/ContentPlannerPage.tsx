@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
-import { Plus, List, CalendarDays, Loader2, Users } from "lucide-react";
+import { Plus, List, CalendarDays, Loader2, Users, Check, ChevronsUpDown } from "lucide-react";
 import { CalendarGrid } from "@/components/planner/CalendarGrid";
 import { PostComposer } from "@/components/planner/PostComposer";
 import { PostCard } from "@/components/planner/PostCard";
@@ -12,8 +12,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 interface FBConnection {
   id: string;
@@ -32,6 +35,8 @@ export default function ContentPlannerPage() {
   const canManageOthers = isAdmin || isSuperAdmin;
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const [users, setUsers] = useState<UserOption[]>([]);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [autoPublish, setAutoPublish] = useState(true);
   const { posts, isLoading, createPost, updatePost, deletePost } = useScheduledPosts(
     canManageOthers ? selectedUserId : undefined
   );
@@ -69,6 +74,12 @@ export default function ContentPlannerPage() {
         else setConnections([]);
       });
   }, [user, selectedUserId, canManageOthers]);
+
+  const selectedUserLabel = useMemo(() => {
+    if (!selectedUserId) return "My Posts";
+    const u = users.find((u) => u.id === selectedUserId);
+    return u ? u.full_name || u.email || u.id.slice(0, 8) : "Select user";
+  }, [selectedUserId, users]);
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
@@ -133,26 +144,80 @@ export default function ContentPlannerPage() {
         </Button>
       </div>
 
-      {/* Admin: User selector */}
+      {/* Admin: User selector + Auto-publish toggle */}
       {canManageOthers && (
         <Card>
           <CardContent className="pt-4 pb-3 px-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm font-medium whitespace-nowrap">Manage posts for:</Label>
-              <Select value={selectedUserId || "__self__"} onValueChange={(v) => setSelectedUserId(v === "__self__" ? undefined : v)}>
-                <SelectTrigger className="max-w-xs">
-                  <SelectValue placeholder="Select user" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__self__">My Posts</SelectItem>
-                  {users.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.full_name || u.email || u.id.slice(0, 8)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Searchable user combobox */}
+              <div className="flex items-center gap-3">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium whitespace-nowrap">Manage posts for:</Label>
+                <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={userSearchOpen}
+                      className="w-[250px] justify-between font-normal"
+                    >
+                      <span className="truncate">{selectedUserLabel}</span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[280px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search users..." />
+                      <CommandList>
+                        <CommandEmpty>No user found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value="my-posts"
+                            onSelect={() => {
+                              setSelectedUserId(undefined);
+                              setUserSearchOpen(false);
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", !selectedUserId ? "opacity-100" : "opacity-0")} />
+                            My Posts
+                          </CommandItem>
+                          {users.map((u) => (
+                            <CommandItem
+                              key={u.id}
+                              value={`${u.full_name || ""} ${u.email || ""}`}
+                              onSelect={() => {
+                                setSelectedUserId(u.id);
+                                setUserSearchOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", selectedUserId === u.id ? "opacity-100" : "opacity-0")} />
+                              <div className="flex flex-col">
+                                <span className="text-sm">{u.full_name || "Unnamed"}</span>
+                                {u.email && <span className="text-xs text-muted-foreground">{u.email}</span>}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Auto-publish toggle */}
+              <div className="flex items-center gap-2 ml-auto">
+                <Label htmlFor="auto-publish" className="text-sm font-medium cursor-pointer">
+                  Auto-publish
+                </Label>
+                <Switch
+                  id="auto-publish"
+                  checked={autoPublish}
+                  onCheckedChange={setAutoPublish}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {autoPublish ? "Posts will be published automatically" : "Plan only — no auto-publish"}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -231,6 +296,7 @@ export default function ContentPlannerPage() {
         isSubmitting={createPost.isPending || updatePost.isPending}
         initialDate={selectedDate}
         editPost={editPost}
+        autoPublish={autoPublish}
       />
     </div>
   );
