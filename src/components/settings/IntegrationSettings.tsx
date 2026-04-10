@@ -29,9 +29,10 @@ interface IntegrationCardProps {
   saving: boolean;
   onTest?: () => void;
   testing?: boolean;
+  dirty?: boolean;
 }
 
-function IntegrationCard({ title, icon, isConfigured, children, onSave, saving, onTest, testing }: IntegrationCardProps) {
+function IntegrationCard({ title, icon, isConfigured, children, onSave, saving, onTest, testing, dirty }: IntegrationCardProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -44,17 +45,18 @@ function IntegrationCard({ title, icon, isConfigured, children, onSave, saving, 
         </Badge>
       </div>
       {children}
-      <div className="flex gap-2 pt-2">
+      <div className="flex items-center gap-2 pt-2">
         <Button onClick={onSave} disabled={saving} size="sm">
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Save
         </Button>
         {onTest && (
-          <Button onClick={onTest} disabled={testing} size="sm" variant="outline">
+          <Button onClick={onTest} disabled={testing || dirty} size="sm" variant="outline" title={dirty ? 'Save your changes first' : undefined}>
             {testing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Test Connection
           </Button>
         )}
+        {dirty && <span className="text-xs text-warning">Save changes before testing</span>}
       </div>
     </div>
   );
@@ -114,6 +116,17 @@ interface IntegrationSettingsProps {
 export function IntegrationSettings({ settings, updateSetting, saveSettings, saving }: IntegrationSettingsProps) {
   const { toast } = useToast();
   const [testing, setTesting] = useState<Record<string, boolean>>({});
+  const [dirty, setDirty] = useState<Record<string, boolean>>({});
+
+  const trackDirty = (section: string, key: string, value: string) => {
+    updateSetting(key, value);
+    setDirty((prev) => ({ ...prev, [section]: true }));
+  };
+
+  const saveAndClearDirty = async (section: string, settingsToSave: Array<{ key: string; value: string; is_sensitive: boolean }>) => {
+    await saveSettings(settingsToSave);
+    setDirty((prev) => ({ ...prev, [section]: false }));
+  };
 
   const testConnection = async (type: string) => {
     setTesting((prev) => ({ ...prev, [type]: true }));
@@ -245,7 +258,7 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         title="PayPal"
         icon={<Wallet className="h-5 w-5 text-[#003087]" />}
         isConfigured={isConfigured('paypal_client_id')}
-        onSave={() => saveSettings([
+        onSave={() => saveAndClearDirty('paypal', [
           { key: 'paypal_client_id', value: settings.paypal_client_id || '', is_sensitive: false },
           { key: 'paypal_client_secret', value: settings.paypal_client_secret || '', is_sensitive: true },
           { key: 'paypal_sandbox_mode', value: settings.paypal_sandbox_mode || 'true', is_sensitive: false },
@@ -253,6 +266,7 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
         saving={saving}
         onTest={() => testConnection('paypal')}
         testing={testing.paypal}
+        dirty={dirty.paypal}
       >
         <div className="p-3 rounded-lg bg-muted/50 text-sm mb-4">
           <p className="text-muted-foreground">
@@ -261,16 +275,19 @@ export function IntegrationSettings({ settings, updateSetting, saveSettings, sav
               PayPal Developer Dashboard
             </a>
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            <strong>Important:</strong> Use Live credentials with Sandbox OFF, or Sandbox credentials with Sandbox ON.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Client ID</Label>
-            <Input value={settings.paypal_client_id || ''} onChange={(e) => updateSetting('paypal_client_id', e.target.value)} placeholder="PayPal Client ID" />
+            <Input value={settings.paypal_client_id || ''} onChange={(e) => trackDirty('paypal', 'paypal_client_id', e.target.value)} placeholder="PayPal Client ID" />
           </div>
-          <SecretInput id="paypal-secret" label="Client Secret" value={settings.paypal_client_secret || ''} onChange={(v) => updateSetting('paypal_client_secret', v)} helpText="From developer.paypal.com" />
+          <SecretInput id="paypal-secret" label="Client Secret" value={settings.paypal_client_secret || ''} onChange={(v) => trackDirty('paypal', 'paypal_client_secret', v)} helpText="From developer.paypal.com" />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <Switch checked={settings.paypal_sandbox_mode !== 'false'} onCheckedChange={(v) => updateSetting('paypal_sandbox_mode', String(v))} />
+          <Switch checked={settings.paypal_sandbox_mode !== 'false'} onCheckedChange={(v) => trackDirty('paypal', 'paypal_sandbox_mode', String(v))} />
           <Label>Sandbox Mode (Testing)</Label>
         </div>
       </IntegrationCard>
