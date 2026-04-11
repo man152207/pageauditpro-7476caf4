@@ -170,11 +170,11 @@ export default function HomePage() {
     <div className="flex flex-col overflow-hidden">
       <SEOHead />
       {/* ========== YOAST-STYLE HERO ========== */}
-      <section className="relative py-20 sm:py-28 md:py-32 hero-pattern-premium overflow-hidden">
+      <section className="relative py-20 sm:py-28 md:py-36 hero-pattern-premium overflow-hidden">
         {/* Floating orbs */}
-        <div className="floating-orb floating-orb-purple w-[500px] h-[500px] -top-40 -left-40" />
-        <div className="floating-orb floating-orb-green w-[400px] h-[400px] -bottom-32 -right-32" style={{ animationDelay: '4s' }} />
-        <div className="floating-orb floating-orb-purple w-[300px] h-[300px] top-1/2 right-1/4 opacity-20" style={{ animationDelay: '2s' }} />
+        <div className="floating-orb floating-orb-purple w-[600px] h-[600px] -top-48 -left-48" />
+        <div className="floating-orb floating-orb-green w-[500px] h-[500px] -bottom-40 -right-40" style={{ animationDelay: '4s' }} />
+        <div className="floating-orb floating-orb-purple w-[350px] h-[350px] top-1/3 right-1/4 opacity-15" style={{ animationDelay: '2s' }} />
 
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
@@ -185,28 +185,27 @@ export default function HomePage() {
             </div>
 
             {/* Headline */}
-            <h1 className="mb-6 text-white animate-fade-in-up text-balance">
+            <h1 className="mb-6 text-white animate-fade-in-up text-balance" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
               Boost Your Page with{' '}
               <span className="relative">
-                <span className="relative z-10">AI-Powered Insights</span>
-                <span className="absolute bottom-2 left-0 w-full h-3 bg-accent/40 -z-0 rounded" />
+                <span className="relative z-10 text-accent">AI-Powered Insights</span>
               </span>
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl sm:text-2xl text-white/90 mb-10 max-w-2xl mx-auto animate-fade-in-up stagger-1 text-pretty leading-relaxed">
+            <p className="text-xl sm:text-2xl text-white/90 mb-10 max-w-2xl mx-auto animate-fade-in-up stagger-1 text-pretty leading-relaxed" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.2)' }}>
               Get instant health scores, engagement analysis, and personalized action plans to grow your Facebook presence.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up stagger-2">
-              <Button size="xl" variant="success" asChild className="shadow-xl">
+              <Button size="xl" variant="success" asChild className="shadow-2xl hover:shadow-[0_8px_30px_-6px_hsl(86_66%_43%/0.6)] transition-shadow">
                 <Link to="/dashboard/audit">
                   <Zap className="mr-2 h-5 w-5" />
                   Start Free Audit
                 </Link>
               </Button>
-              <Button size="xl" variant="outline" asChild className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/40">
+              <Button size="xl" variant="outline" asChild className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 shadow-lg">
                 <Link to="/sample-report">
                   <Play className="mr-2 h-5 w-5" />
                   View Sample Report
@@ -214,25 +213,62 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {/* Trust signals */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-white/80 animate-fade-in stagger-3">
-              <div className="flex items-center gap-2">
-                <div className="trust-stars">
+            {/* Trust signals - enhanced strip */}
+            <div className="mt-14 trust-strip max-w-xl mx-auto animate-fade-in stagger-3">
+              <div className="trust-strip-item">
+                <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400 drop-shadow-sm" />
                   ))}
                 </div>
-                <span className="text-sm font-semibold">4.8/5 Rating</span>
+                <span>4.8/5</span>
               </div>
               <div className="h-5 w-px bg-white/30 hidden sm:block" />
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                <span className="text-sm font-semibold">GDPR Compliant</span>
+              <div className="trust-strip-item">
+                <Shield className="h-5 w-5 text-accent" />
+                <span>GDPR Compliant</span>
               </div>
               <div className="h-5 w-px bg-white/30 hidden sm:block" />
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                <span className="text-sm font-semibold">10K+ Audits Run</span>
+              <div className="trust-strip-item">
+                <Users className="h-5 w-5 text-accent" />
+                <span>10K+ Audits</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating Mockup Preview */}
+          <div className="max-w-md mx-auto mt-16 animate-fade-in-up stagger-4 hidden sm:block">
+            <div className="mockup-card">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="mockup-score-ring">
+                  <svg width="80" height="80" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(86 70% 50%)" strokeWidth="6" strokeLinecap="round"
+                      strokeDasharray={`${(85/100) * 2 * Math.PI * 34} ${2 * Math.PI * 34}`} />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-extrabold">85</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold">Page Health Score</div>
+                  <div className="text-sm text-white/70">Your page is performing well</div>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { label: 'Engagement', score: 78, color: 'hsl(86 70% 50%)' },
+                  { label: 'Consistency', score: 90, color: 'hsl(86 70% 50%)' },
+                  { label: 'Growth', score: 65, color: 'hsl(38 92% 50%)' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <span className="text-xs text-white/70 w-24">{item.label}</span>
+                    <div className="flex-1 h-2 rounded-full bg-white/15 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${item.score}%`, backgroundColor: item.color }} />
+                    </div>
+                    <span className="text-xs font-bold w-8 text-right">{item.score}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -255,11 +291,11 @@ export default function HomePage() {
             {benefits.map((benefit, index) => (
               <div
                 key={index}
-                className="group premium-card p-7 animate-fade-in-up"
+                className="group gradient-accent-card animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <div className="feature-icon-primary mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <benefit.icon className="h-6 w-6" />
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
+                  <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h4 className="mb-3">{benefit.title}</h4>
                 <p className="text-muted-foreground text-base leading-relaxed">{benefit.description}</p>

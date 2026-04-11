@@ -143,23 +143,27 @@ export default function PricingPage() {
   const { seoContent } = usePageSeoContent('/pricing');
 
   return (
-    <div className="py-16 sm:py-20 lg:py-24">
+    <div>
       <SEOHead />
-      <div className="container">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">
+      {/* Gradient Hero Banner */}
+      <section className="relative py-14 sm:py-18 hero-pattern-mini overflow-hidden">
+        <div className="floating-orb floating-orb-purple w-[300px] h-[300px] -top-20 -right-20 opacity-20" />
+        <div className="container relative text-center max-w-3xl mx-auto animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-5 border border-white/20">
             <Crown className="h-4 w-4" />
             Pricing
           </div>
-          <h1 className="mb-4">
+          <h1 className="mb-4 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
             Simple, Transparent Pricing
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white/85">
             Start free and upgrade when you need advanced insights and automation.
             No hidden fees, cancel anytime.
           </p>
         </div>
+      </section>
+
+      <div className="container py-16 sm:py-20">
 
         {/* Pricing Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">

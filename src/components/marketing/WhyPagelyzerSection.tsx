@@ -51,15 +51,15 @@ export function WhyPagelyzerSection() {
 
         {/* Comparison Table */}
         <div className="max-w-4xl mx-auto">
-          <div className="rounded-2xl border border-border overflow-hidden bg-card shadow-lg">
+          <div className="rounded-2xl border-2 border-primary/20 overflow-hidden bg-card shadow-xl">
             {/* Table Header */}
-            <div className="grid grid-cols-3 bg-muted/70 border-b border-border">
+            <div className="grid grid-cols-3 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-primary/15">
               <div className="p-4 sm:p-5 font-bold text-sm sm:text-base">Aspect</div>
               <div className="p-4 sm:p-5 font-bold text-center text-sm sm:text-base text-muted-foreground">
                 Business Suite
               </div>
-              <div className="p-4 sm:p-5 font-bold text-center text-sm sm:text-base flex items-center justify-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
+              <div className="p-4 sm:p-5 font-bold text-center text-sm sm:text-base flex items-center justify-center gap-2 text-primary">
+                <BarChart3 className="h-4 w-4" />
                 Pagelyzer
               </div>
             </div>
@@ -68,7 +68,7 @@ export function WhyPagelyzerSection() {
             {comparisonRows.map((row, index) => (
               <div
                 key={index}
-                className="grid grid-cols-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
+                className="grid grid-cols-3 border-b border-border last:border-b-0 hover:bg-primary/5 transition-colors"
               >
                 <div className="p-4 sm:p-5 font-medium text-sm sm:text-base">{row.aspect}</div>
                 <div className="p-4 sm:p-5 text-center">
@@ -77,10 +77,10 @@ export function WhyPagelyzerSection() {
                     <span className="text-sm">{row.businessSuite}</span>
                   </div>
                 </div>
-                <div className="p-4 sm:p-5 text-center">
-                  <div className="flex items-center justify-center gap-2 text-success">
+                <div className="p-4 sm:p-5 text-center bg-accent/5">
+                  <div className="flex items-center justify-center gap-2 text-success font-medium">
                     <CheckCircle2 className="h-4 w-4 shrink-0 hidden sm:block" />
-                    <span className="text-sm font-medium">{row.pagelyzer}</span>
+                    <span className="text-sm">{row.pagelyzer}</span>
                   </div>
                 </div>
               </div>

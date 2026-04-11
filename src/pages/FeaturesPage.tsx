@@ -90,23 +90,28 @@ export default function FeaturesPage() {
   const { seoContent } = usePageSeoContent('/features');
 
   return (
-    <div className="py-16 sm:py-20 lg:py-24">
+    <div>
       <SEOHead />
-      <div className="container">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">
+      {/* Gradient Hero Banner */}
+      <section className="relative py-16 sm:py-20 hero-pattern-mini overflow-hidden">
+        <div className="floating-orb floating-orb-purple w-[400px] h-[400px] -top-32 -left-32 opacity-20" />
+        <div className="floating-orb floating-orb-green w-[300px] h-[300px] -bottom-24 -right-24 opacity-20" style={{ animationDelay: '3s' }} />
+        <div className="container relative text-center max-w-3xl mx-auto animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-5 border border-white/20">
             <Sparkles className="h-4 w-4" />
             Features
           </div>
-          <h1 className="mb-4">
+          <h1 className="mb-4 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
             Powerful Features for Every Need
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white/85" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.15)' }}>
             From basic audits to advanced AI-powered insights, we have everything 
             you need to grow your Facebook presence.
           </p>
         </div>
+      </section>
+
+      <div className="container py-16 sm:py-20">
 
         {/* Free Features */}
         <div className="mb-16 sm:mb-20">
@@ -124,10 +129,10 @@ export default function FeaturesPage() {
             {freeFeatures.map((feature, index) => (
               <div
                 key={index}
-                className="premium-card p-7 animate-fade-in-up"
+                className="group gradient-accent-card animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
                   <feature.icon className="h-6 w-6 text-accent" />
                 </div>
                 <h4 className="font-bold mb-2">{feature.title}</h4>
@@ -153,10 +158,10 @@ export default function FeaturesPage() {
             {proFeatures.map((feature, index) => (
               <div
                 key={index}
-                className="premium-card p-7 animate-fade-in-up"
+                className="group gradient-accent-card animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.06}s` }}
               >
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
                   <feature.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h4 className="font-bold mb-2">{feature.title}</h4>
