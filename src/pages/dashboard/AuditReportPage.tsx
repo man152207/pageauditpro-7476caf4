@@ -384,33 +384,61 @@ Powered by Pagelyzer
         existingIsPublic={report.report?.is_public}
       />
 
-      {/* Data Status Alert - only show when insights are missing (critical data) */}
-      {report.data_availability && !report.data_availability.insights && (
+      {/* Data Status Alert - specific failure reasons */}
+      {report.data_availability && !report.data_availability.insights && !report.data_availability.posts && (
         <Alert className="mt-4 border-warning/50 bg-warning/5">
           <AlertTriangle className="h-4 w-4 text-warning" />
           <AlertTitle className="text-warning">Limited Data Available</AlertTitle>
           <AlertDescription className="text-sm text-muted-foreground">
             <p className="mb-2">Facebook returned limited data for this page. This may be due to:</p>
             <ul className="list-disc list-inside space-y-0.5 text-xs mb-2">
-              <li>Page activity level during selected date range</li>
-              <li>API permission restrictions (Page Admin role required for insights)</li>
-              <li>Page privacy or analytics settings</li>
+              {report.data_availability.postsError && (
+                <li>Posts: {report.data_availability.postsError}</li>
+              )}
+              {report.data_availability.pageInfoError && (
+                <li>Page info: {report.data_availability.pageInfoError}</li>
+              )}
+              {report.data_availability.insightsError && (
+                <li>Insights: {report.data_availability.insightsError}</li>
+              )}
+              {!report.data_availability.postsError && !report.data_availability.pageInfoError && (
+                <li>API permission restrictions or page privacy settings</li>
+              )}
             </ul>
             <p className="text-xs">
-              <strong>Try:</strong> Disconnecting and reconnecting your Facebook page with all permissions, or selecting a different date range.
+              <strong>Try:</strong> Disconnecting and reconnecting your Facebook page, or selecting a different date range.
             </p>
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Info alert for missing posts data (non-critical) */}
+      {/* Info alert: insights available but posts failed */}
       {report.data_availability && report.data_availability.insights && !report.data_availability.posts && (
         <Alert className="mt-4 border-primary/30 bg-primary/5">
           <AlertTriangle className="h-4 w-4 text-primary" />
-         <AlertTitle className="text-primary text-sm">No Posts Found</AlertTitle>
+          <AlertTitle className="text-primary text-sm">Post Data Unavailable</AlertTitle>
           <AlertDescription className="text-xs text-muted-foreground">
-            No posts were found in the selected date range. Try a longer date range or check that the page has published content.
-            Insights, engagement trends, and follower data are available and displayed below.
+            {report.data_availability.postsError ? (
+              <p>Could not fetch posts: {report.data_availability.postsError}</p>
+            ) : (
+              <p>No posts found in the selected date range.</p>
+            )}
+            <p className="mt-1">
+              Engagement trends and follower data from Facebook Insights are displayed below.
+              {report.data_availability.followersSource === 'insights_fallback' && (
+                <span> Follower count is derived from page insights data.</span>
+              )}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Score exclusion notice */}
+      {report.data_availability?.excludedScores?.length > 0 && (
+        <Alert className="mt-4 border-muted bg-muted/30">
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <AlertDescription className="text-xs text-muted-foreground">
+            Some score categories ({report.data_availability.excludedScores.join(', ')}) could not be calculated due to missing data and were excluded from the overall score.
           </AlertDescription>
         </Alert>
       )}
@@ -441,27 +469,39 @@ Powered by Pagelyzer
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <StatCard
                 title="Total Followers"
-                value={computedMetrics.followers != null ? computedMetrics.followers.toLocaleString() : '—'}
+                value={computedMetrics.followers != null ? computedMetrics.followers.toLocaleString() : 'Unavailable'}
+                description={computedMetrics.followersSource === 'insights_fallback' ? 'From insights' : undefined}
                 icon={Users}
               />
               <StatCard
                 title="Posts Analyzed"
-                value={computedMetrics.postsCount != null ? computedMetrics.postsCount.toLocaleString() : '—'}
+                value={computedMetrics.postsCount != null ? computedMetrics.postsCount.toLocaleString() : 'Unavailable'}
                 icon={FileBarChart}
               />
               <StatCard
                 title="Engagement Rate"
-                value={computedMetrics.engagementRate != null ? `${computedMetrics.engagementRate.toFixed(2)}%` : '—'}
+                value={computedMetrics.engagementRate != null ? `${computedMetrics.engagementRate.toFixed(2)}%` : (computedMetrics.insightTotalEngagements ? 'Post data needed' : 'Unavailable')}
                 icon={TrendingUp}
               />
               <StatCard
                 title="Avg. Engagement/Post"
-                value={computedMetrics.avgEngagementPerPost != null ? computedMetrics.avgEngagementPerPost.toLocaleString() : '—'}
+                value={computedMetrics.avgEngagementPerPost != null ? computedMetrics.avgEngagementPerPost.toLocaleString() : 'Unavailable'}
                 icon={ThumbsUp}
               />
               <StatCard
                 title="Total Engagements"
-                value={computedMetrics.totalEngagements != null ? computedMetrics.totalEngagements.toLocaleString() : '—'}
+                value={
+                  computedMetrics.totalEngagements != null && computedMetrics.totalEngagements > 0
+                    ? computedMetrics.totalEngagements.toLocaleString()
+                    : computedMetrics.insightTotalEngagements != null && computedMetrics.insightTotalEngagements > 0
+                      ? computedMetrics.insightTotalEngagements.toLocaleString()
+                      : 'Unavailable'
+                }
+                description={
+                  computedMetrics.totalEngagements == null && computedMetrics.insightTotalEngagements > 0
+                    ? 'From insights'
+                    : undefined
+                }
                 icon={MessageSquare}
               />
             </div>
@@ -486,9 +526,9 @@ Powered by Pagelyzer
           >
             <ScoreExplanationGrid
               breakdown={{
-                engagement: scores.engagement || 0,
-                consistency: scores.consistency || 0,
-                readiness: scores.readiness || 0,
+                engagement: scores.engagement ?? null,
+                consistency: scores.consistency ?? null,
+                readiness: scores.readiness ?? null,
               }}
               detailedMetrics={computedMetrics}
               inputSummary={report.input_data}
