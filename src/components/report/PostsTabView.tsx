@@ -69,27 +69,30 @@ function generateWhyItWorked(post: Post, isTop: boolean): string {
   const engagement = (post.likes || 0) + (post.comments || 0) + (post.shares || 0);
   const hints: string[] = [];
 
-  // Check if we have enough metrics to infer why
   const hasMetrics = post.likes !== undefined || post.comments !== undefined || post.shares !== undefined;
   
   if (!hasMetrics || engagement === 0) {
-    return 'Not enough data to infer why';
+    return isTop ? 'Not enough data to evaluate performance' : 'No engagement recorded — try a different content format or posting time';
   }
 
   if (isTop) {
     if (engagement > 100) hints.push('High engagement above average');
     if (post.type?.toLowerCase() === 'video') hints.push('Video content drives 2x more engagement');
     if (post.type?.toLowerCase() === 'photo') hints.push('Visual content captures attention');
-    if ((post.shares || 0) > (post.likes || 0) * 0.1) hints.push('Strong share rate indicates value');
-    if ((post.comments || 0) > (post.likes || 0) * 0.05) hints.push('Good conversation starter');
+    if ((post.shares || 0) > (post.likes || 0) * 0.1) hints.push('Strong share rate — people found it worth sharing');
+    if ((post.comments || 0) > (post.likes || 0) * 0.05) hints.push('Good conversation starter — drove comments');
+    if (post.message && post.message.length > 50) hints.push('Detailed caption provided context');
   } else {
-    if (engagement < 20) hints.push('Low engagement - consider different content type');
-    if (post.type?.toLowerCase() === 'status') hints.push('Text-only posts often underperform');
-    if ((post.shares || 0) === 0) hints.push('No shares - content may lack shareability');
-    if (!post.message || post.message.length < 20) hints.push('Short/missing caption limits context');
+    if (engagement < 20) hints.push('Low engagement — try a different content format');
+    if (post.type?.toLowerCase() === 'status') hints.push('Text-only posts underperform — add an image or video');
+    if ((post.shares || 0) === 0) hints.push('Zero shares — add a call-to-action or shareable value');
+    if ((post.comments || 0) === 0) hints.push('No comments — ask a question to spark conversation');
+    if (!post.message || post.message.length < 20) hints.push('Short/missing caption — add more context');
+    if ((post.reach || 0) < 50 && post.reach !== undefined) hints.push('Very low reach — consider boosting or posting at peak hours');
+    if (post.type?.toLowerCase() !== 'video' && post.type?.toLowerCase() !== 'photo') hints.push('Add visuals (photo/video) to boost engagement');
   }
 
-  return hints.length > 0 ? hints[0] : 'Not enough data to infer why';
+  return hints.length > 0 ? hints.join('. ') + '.' : 'Not enough data to infer why';
 }
 
 function PostRow({ post, rank, isTop }: { post: Post; rank: number; isTop: boolean }) {
@@ -267,8 +270,9 @@ export function PostsTabView({ posts, isLoading, className }: PostsTabViewProps)
     return engB - engA;
   });
 
-  const topPosts = sortedPosts.slice(0, 5);
-  const bottomPosts = sortedPosts.slice(-5).reverse();
+  const midpoint = Math.ceil(sortedPosts.length / 2);
+  const topPosts = sortedPosts.slice(0, midpoint);
+  const bottomPosts = sortedPosts.slice(midpoint);
 
   return (
     <div className={cn('space-y-4', className)}>
