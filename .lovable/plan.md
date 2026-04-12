@@ -1,32 +1,23 @@
 
 
-# Fix: Posts appearing in both "Top Posts" and "Needs Work" tabs
+# Add preview-mode tooltip to Facebook post links
 
-## Problem
-With only 4 posts, `sortedPosts.slice(0, 5)` returns all 4 posts, and `sortedPosts.slice(-5)` also returns all 4. Every post shows up in both tabs.
+## What
+Add a small info tooltip next to every "View on Facebook" link explaining that links may appear blocked in the Lovable preview but work fine on the published site.
 
-## Fix
+## Files to modify
 
-**File: `src/components/report/PostsTabView.tsx`**
-
-1. **Split posts into non-overlapping sets** — divide sorted posts at the midpoint:
-   - Top half goes to "Top Posts"
-   - Bottom half goes to "Needs Work"
-   - If only 1 post, show it in "Top Posts" only and hide the "Needs Work" tab
-
-2. **Show ALL relevant "why" hints instead of just the first one** — currently `generateWhyItWorked` returns only `hints[0]`. Change it to return all matched hints joined together so the user gets a full explanation.
-
-3. **Improve "Needs Work" hints** to be more actionable:
-   - Add hints for low comments, low shares ratio, low reach
-   - Suggest specific improvements (e.g., "Add visuals to boost engagement", "Ask a question to drive comments")
-
-### Splitting logic
+### 1. `src/components/report/TopPostsTable.tsx` (~line 209-220)
+Next to the "View" link, add a Tooltip with an Info icon:
 ```
-const midpoint = Math.ceil(sortedPosts.length / 2);
-const topPosts = sortedPosts.slice(0, midpoint);
-const bottomPosts = sortedPosts.slice(midpoint);
-// If only 1 post total, bottomPosts will be empty — hide "Needs Work" tab
+View ⓘ  ← tooltip: "Facebook links may be blocked in preview mode. They work normally on the live site."
 ```
 
-This ensures no post ever appears in both tabs regardless of total count.
+### 2. `src/components/report/PostsTabView.tsx` (~line 144-158)
+Same tooltip added next to the external link in PostRow.
+
+### 3. `src/components/report/CreativePreview.tsx` (~line 115-123)
+Same tooltip added next to the creative permalink.
+
+Each tooltip will use the existing `<Tooltip>` / `<TooltipContent>` components already imported in these files, with a small `Info` icon (already imported in most of them).
 
