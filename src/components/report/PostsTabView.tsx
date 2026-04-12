@@ -192,7 +192,7 @@ function PostRow({ post, rank, isTop }: { post: Post; rank: number; isTop: boole
               <span>{(post.reach || post.impressions || 0).toLocaleString()}</span>
             </div>
           )}
-          {post.engagement_rate !== undefined && (
+          {post.engagement_rate != null && (
             <Badge variant="secondary" className="text-xs">
               {post.engagement_rate.toFixed(2)}% ER
             </Badge>
