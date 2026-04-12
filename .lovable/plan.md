@@ -1,62 +1,35 @@
 
 
-# SEO Content + Blog Posts Generation with Global Keywords
+# Fix: Blog posts showing raw Markdown instead of rendered HTML
 
-## Overview
-Generate comprehensive SEO content for all 10 existing marketing pages AND create 30-40 SEO-optimized blog posts — all with deeply researched, globally competitive keywords targeting the Facebook audit/social media marketing niche.
+## Problem
+Blog content is stored as Markdown (`## headings`, `**bold**`, `- lists`) but the renderer just does `post.content.replace(/\n/g, '<br/>')` — it never converts Markdown to HTML. Also, `@tailwindcss/typography` plugin is missing so even if HTML were rendered, `prose` classes wouldn't style it.
 
-## Approach
+## Fix
 
-Use the Lovable AI script to research and generate all content in bulk, then insert into the database.
+### 1. Install dependencies
+- `react-markdown` — renders Markdown as React components
+- `@tailwindcss/typography` — provides `prose` styles for rendered content
 
-### Step 1: Generate updated SEO for 10 existing pages
-Use AI to produce for each route:
-- **Title** (60 chars, keyword-front-loaded)
-- **Description** (155 chars, compelling + keywords)
-- **Keywords** (20-30 high-volume global keywords per page)
-- **seo_content** (300-500 word keyword-rich paragraph)
+### 2. Update `tailwind.config.ts`
+Add `@tailwindcss/typography` to the plugins array.
 
-Routes: `/`, `/features`, `/pricing`, `/faq`, `/contact`, `/sample-report`, `/privacy-policy`, `/terms-of-service`, `/data-deletion`, `/blog`
+### 3. Update `src/pages/BlogPostPage.tsx`
+Replace the `dangerouslySetInnerHTML` line with `<ReactMarkdown>` component:
+```tsx
+import ReactMarkdown from 'react-markdown';
 
-### Step 2: Generate 35 blog posts
-AI-generated articles covering high-search-volume topics like:
-- "How to audit your Facebook Page in 2026"
-- "Facebook engagement rate benchmarks by industry"
-- "Best times to post on Facebook"
-- "Facebook algorithm changes explained"
-- "Social media audit checklist"
-- "How to increase Facebook Page followers organically"
-- "Facebook vs Instagram marketing comparison"
-- "AI tools for social media management"
-- etc.
+// Replace line 130:
+<ReactMarkdown>{post.content}</ReactMarkdown>
+```
+This properly renders headings, bold, lists, links, code blocks etc.
 
-Each blog post will include:
-- `slug`, `title`, `excerpt`, `content` (1000-2000 words, markdown)
-- `meta_title`, `meta_description`, `meta_keywords`
-- `tags`, `author`, `published = true`, `published_at = now()`
+### 4. Add prose styles to `src/index.css`
+Add custom prose overrides matching the site's design system (heading colors, link colors, spacing) so blog content looks polished and consistent with the rest of the site.
 
-### Step 3: Insert into database
-- UPDATE `page_seo` table for 10 existing routes
-- INSERT 35 new rows into `blog_posts` table
+### 5. Blog list page excerpt — no changes needed
+Excerpts are plain text, not Markdown, so `BlogListPage.tsx` is fine as-is.
 
-### Keyword Research Focus Areas
-Global high-volume keywords across these clusters:
-1. **Facebook audit**: facebook page audit, facebook page analyzer, facebook page health check, social media audit tool
-2. **Engagement**: facebook engagement rate, how to increase facebook engagement, engagement calculator
-3. **Analytics**: facebook analytics tool, facebook insights alternative, social media analytics
-4. **Content strategy**: best time to post on facebook, facebook content strategy, social media content calendar
-5. **Growth**: grow facebook page, increase facebook followers, facebook marketing tips
-6. **Comparison**: facebook vs instagram, social media management tools comparison
-7. **AI/Automation**: AI social media tools, automated social media audit, AI marketing recommendations
-8. **Industry-specific**: facebook for small business, facebook for agencies, nonprofit facebook marketing
-
-## Technical Details
-- Use `lovable_ai.py` script with `google/gemini-3-flash-preview` for content generation
-- Generate in batches to avoid rate limits
-- Output as JSON, then insert via database tools
-- All blog posts marked `published: true` with current timestamp
-
-## Files involved
-- No code file changes needed
-- Database inserts only: `page_seo` (UPDATE 10 rows) + `blog_posts` (INSERT ~35 rows)
+## Result
+All 35 blog posts will render with proper headings, bold text, lists, and formatting instead of raw `##` and `**` symbols.
 
