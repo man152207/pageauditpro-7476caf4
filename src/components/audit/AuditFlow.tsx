@@ -22,6 +22,7 @@ interface FBConnection {
   page_name: string;
   is_active: boolean;
   connected_at: string;
+  token_expires_at?: string | null;
 }
 
 interface AuditResult {
