@@ -7,8 +7,8 @@
   # These require mod_proxy to be enabled
   # ============================================
   
-  # Sitemap - proxy to edge function (URL stays as pagelyzer.io/sitemap.xml)
-  RewriteRule ^sitemap\.xml$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap [P,L]
+  # Sitemap - redirect to edge function (mod_proxy not available on host)
+  RewriteRule ^sitemap\.xml$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap [R=302,L,NE]
   
   # Stripe Webhook - proxy to edge function
   RewriteRule ^api/webhooks/stripe$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/stripe-webhook [P,L]
