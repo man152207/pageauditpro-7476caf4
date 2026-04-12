@@ -1,14 +1,10 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { 
-  ChevronDown, 
   ThumbsUp, 
   BarChart3, 
   Zap,
-  HelpCircle,
   Info
 } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Tooltip,
   TooltipContent,
@@ -33,10 +29,6 @@ function getGradeInfo(score: number): { grade: string; label: string; colorClass
   return { grade: 'F', label: 'Needs Work', colorClass: 'text-destructive bg-destructive/10' };
 }
 
-/**
- * Individual Score Explanation Card - Compact version
- * Requirement B3
- */
 export function ScoreExplanationCard({
   title,
   score,
@@ -45,7 +37,6 @@ export function ScoreExplanationCard({
   explanationItems,
   className,
 }: ScoreExplanationCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const { grade, label, colorClass } = getGradeInfo(score);
 
   return (
@@ -53,7 +44,6 @@ export function ScoreExplanationCard({
       'rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/20 hover:shadow-md',
       className
     )}>
-      {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -73,36 +63,24 @@ export function ScoreExplanationCard({
 
       <p className="text-xs text-muted-foreground mb-2">{label}</p>
 
-      {/* Why this score? Accordion */}
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-medium w-full">
-          <HelpCircle className="h-3.5 w-3.5" />
-          <span>Why this score?</span>
-          <ChevronDown className={cn(
-            'h-3.5 w-3.5 ml-auto transition-transform duration-200',
-            isOpen && 'rotate-180'
-          )} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="p-2.5 rounded-lg bg-muted/50 border border-border space-y-1.5">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-              {explanationTitle}
-            </p>
-            <ul className="space-y-1">
-              {explanationItems.map((item, index) => (
-                <li key={index} className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">{item.label}</span>
-                  {item.available !== false ? (
-                    <span className="font-medium">{item.value ?? '—'}</span>
-                  ) : (
-                    <span className="text-muted-foreground/50 text-[10px]">Not available</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Always visible breakdown */}
+      <div className="p-2.5 rounded-lg bg-muted/50 border border-border space-y-1.5">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+          {explanationTitle}
+        </p>
+        <ul className="space-y-1">
+          {explanationItems.map((item, index) => (
+            <li key={index} className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">{item.label}</span>
+              {item.available !== false ? (
+                <span className="font-medium">{item.value ?? '—'}</span>
+              ) : (
+                <span className="text-muted-foreground/50 text-[10px]">Not available</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

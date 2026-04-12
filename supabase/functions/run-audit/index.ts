@@ -384,24 +384,36 @@ serve(async (req) => {
     const hasProAccess = isPro || hasFreeAuditGrant;
     if (hasProAccess) {
       try {
-        const demoUrl = `https://graph.facebook.com/v21.0/${pageId}/insights?` +
-          `metric=page_follows_gender_age,page_follows_city,page_follows_country&` +
-          `period=lifetime&access_token=${pageToken}`;
-        const demoRes = await fetch(demoUrl);
-        const demoData = await demoRes.json();
-        if (!demoData.error && demoData.data) {
-          demographics = {
-            genderAge: demoData.data.find((d: any) => d.name === 'page_follows_gender_age')?.values?.[0]?.value || null,
-            cities: demoData.data.find((d: any) => d.name === 'page_follows_city')?.values?.[0]?.value || null,
-            countries: demoData.data.find((d: any) => d.name === 'page_follows_country')?.values?.[0]?.value || null,
-          };
-          dataAvailability.demographics = true;
-        } else {
+        // Try page_follows_* first, then fallback to page_fans_*
+        const metricSets = [
+          ['page_follows_gender_age', 'page_follows_city', 'page_follows_country'],
+          ['page_fans_gender_age', 'page_fans_city', 'page_fans_country'],
+        ];
+        let demoFetched = false;
+        for (const metrics of metricSets) {
+          const demoUrl = `https://graph.facebook.com/v21.0/${pageId}/insights?` +
+            `metric=${metrics.join(',')}&period=lifetime&access_token=${pageToken}`;
+          const demoRes = await fetch(demoUrl);
+          const demoData = await demoRes.json();
+          if (!demoData.error && demoData.data && demoData.data.length > 0) {
+            demographics = {
+              genderAge: demoData.data.find((d: any) => d.name === metrics[0])?.values?.[0]?.value || null,
+              cities: demoData.data.find((d: any) => d.name === metrics[1])?.values?.[0]?.value || null,
+              countries: demoData.data.find((d: any) => d.name === metrics[2])?.values?.[0]?.value || null,
+            };
+            dataAvailability.demographics = true;
+            demoFetched = true;
+            logStep("Demographics fetched with metrics", { metrics });
+            break;
+          }
+        }
+        if (!demoFetched) {
           dataAvailability.demographics = false;
-          dataAvailability.demographicsError = demoData.error?.message || 'Demographics not available';
+          dataAvailability.demographicsError = 'Facebook does not provide demographic data for this page. This is a Meta platform restriction.';
         }
       } catch (_e) {
         dataAvailability.demographics = false;
+        dataAvailability.demographicsError = 'Failed to fetch demographics from Facebook API.';
       }
     }
 
@@ -447,14 +459,19 @@ serve(async (req) => {
       ? Math.round((totalEngagements / postsCount) * 10) / 10
       : null;
 
-    // Detect post media type from full_picture presence (since `type` is deprecated)
+    // Detect post media type from permalink_url and full_picture (since `type` is deprecated)
+    const inferPostType = (p: any): string => {
+      const permalink = p.permalink_url || '';
+      if (permalink.includes('/reel/') || permalink.includes('/videos/')) return 'video';
+      if (p.full_picture) return 'photo';
+      return 'status';
+    };
+
     let topPostType: string | null = null;
     if (posts.length > 0) {
       const typeCounts: Record<string, number> = {};
       posts.forEach((p: any) => {
-        // Infer type from available data since `type` field is deprecated
-        const inferredType = p.full_picture ? 'photo' : 'status';
-        typeCounts[inferredType] = (typeCounts[inferredType] || 0) + 1;
+        typeCounts[inferPostType(p)] = (typeCounts[inferPostType(p)] || 0) + 1;
       });
       topPostType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || null;
     }
@@ -585,7 +602,7 @@ serve(async (req) => {
     const sortedPosts = [...posts].map((p: any) => {
       const pInsight = postInsights[p.id] || {};
       const engagement = (p.likes?.summary?.total_count || 0) + (p.comments?.summary?.total_count || 0) + (p.shares?.count || 0);
-      const inferredType = p.full_picture ? 'photo' : 'status';
+      const inferredType = inferPostType(p);
       return {
         id: p.id, type: inferredType, created_time: p.created_time, message: p.message,
         permalink_url: p.permalink_url, full_picture: p.full_picture, media_type: inferredType,

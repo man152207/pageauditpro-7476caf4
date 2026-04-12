@@ -714,13 +714,13 @@ Powered by Pagelyzer
               ) : (
                 <div className="text-center py-8">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-3">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <AlertCircle className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <p className="text-muted-foreground text-sm">
-                    Demographics data can take time to load from Facebook.
+                  <p className="text-muted-foreground text-sm font-medium">
+                    Demographics Unavailable
                   </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
-                    Please check back later or re-run the audit.
+                  <p className="text-xs text-muted-foreground/70 mt-1 max-w-md mx-auto">
+                    {report.data_availability?.demographicsError || 'Facebook does not provide demographic data for this page. This is a Meta platform restriction related to privacy policies.'}
                   </p>
                 </div>
               )}
