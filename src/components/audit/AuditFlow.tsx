@@ -321,6 +321,7 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
             connections={connections}
             onRunAudit={handleRunAudit}
             onDisconnect={handleDisconnect}
+            onReconnect={handleConnect}
             runningAuditId={runningAuditId}
             disconnectingId={disconnectingId}
           />
