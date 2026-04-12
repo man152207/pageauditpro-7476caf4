@@ -1,90 +1,127 @@
 
-# Fix the audit so the full report is honest and range-accurate
+# Fix why active Facebook pages still show 0 / missing metrics
 
-## What I verified
-- The full report page currently does not render a proper Key Metrics section, even though the inline preview does.
-- The backend is still using misleading fallbacks:
-  - `postsCount = posts.length || 1`
-  - `postsPerWeek = 3` when posts are missing
-  - Growth is shown in the UI by reusing readiness
-  - Readiness checklist checkmarks are inferred from score thresholds, not real page fields
-- The selected duration is not fully analyzed today:
-  - posts fetch stops at one page (`limit=100`) instead of paginating the full selected range
-  - post-level enrichment only samples the first 25 posts
-- There is also a frontend wiring bug: the report page passes `report.input_summary`, but the payload returns `input_data`.
+## What I confirmed from the live app
+For the latest real reports I checked (`MPG Solution` and `Nayaniti`), the backend is not returning “fake positive” data anymore, but it is still failing in two critical places and then collapsing the report to zero:
 
-## Goal
-Make the report 100% honest to the real Facebook data:
-- show current followers clearly
-- count all retrievable page activity inside the selected range
-- remove invented numbers
-- only show scores/sections backed by real data
-- if Facebook does not return something, show “Unavailable” instead of fabricating it
+1. `insights: true` is coming back with real trend data
+   - `page_follows`
+   - `page_media_view`
+   - `page_post_engagements`
+
+2. But `pageInfo: false` and `posts: false`
+   - followers become `null`
+   - posts analyzed become `0`
+   - readiness becomes `0`
+   - engagement/consistency become `null`
+   - overall score becomes `0`
+
+3. The live stored error for posts is:
+```text
+(#12) deprecate_post_aggregated_fields_for_attachement is deprecated for versions v3.3 and higher
+```
+So the current posts query itself is broken.
+
+4. One saved report also shows the page info request failing with a permission/field error:
+```text
+(#10) This endpoint requires the 'pages_read_engagement' permission or the 'Page Public Content Access' feature
+```
+
+## Root cause
+This is now a partial-data handling bug, not just a token bug:
+
+- the audit still fetches trend insights successfully
+- the post fetch is using a brittle/deprecated Graph API field mix
+- the page info fetch is too fragile and can fail entirely
+- the scoring pipeline depends mainly on `pageInfo + posts`, so when those 2 fail, the whole report falls to zero even though real insights exist
+
+That is why an active page can still look dead inside the report.
 
 ## Implementation plan
-1. Rebuild the audit metric pipeline in `run-audit`
-- paginate through all posts inside the selected `since/until` window
-- compute posts analyzed, total reactions/comments/shares, engagement rate, posts/week, and totals from the full selected range
-- keep follower count as a real current page metric
-- remove fake defaults like `1 post` and `3 posts/week`
-- distinguish:
+
+### 1. Rebuild the Facebook fetch layer in `run-audit`
+- replace the broken `/{page_id}/posts` field set with a safe supported fetch strategy
+- fetch posts in 2 stages:
+  - base post list with safe fields only
+  - per-post engagement fields using supported follow-up requests
+- keep full pagination for the entire selected date range
+- split page info into smaller safe requests instead of one oversized all-fields request
+- store exact fetch errors:
+  - `pageInfoError`
+  - `postsError`
+  - `postsFetchMode`
+  - `followersSource`
+
+### 2. Use real insight fallback when post/page-info fetch fails
+If Facebook gives real insights but not full post/page info:
+- use the latest `page_follows` point as current followers fallback
+- use `page_post_engagements` totals for range engagement fallback
+- keep post-level sections unavailable unless real posts are fetched
+- never show `0` just because a fetch failed
+- never invent numbers
+
+### 3. Make scoring honest with partial data
+- engagement score:
+  - use post-level calculations when posts are available
+  - otherwise use insight-derived engagement if that is the only real source available
+- consistency score:
+  - only calculate when real post count/timestamps exist
+  - otherwise mark unavailable
+- readiness score:
+  - only calculate when page info is actually fetched
+  - otherwise mark unavailable, not `0`
+- overall score:
+  - calculate only from categories backed by real data
+  - exclude unavailable categories instead of dragging total to zero
+
+### 4. Return transparent report metadata from `get-audit-report`
+Add/report:
+- metric source labels (`page_info`, `insights_fallback`, `posts`)
+- exact failure reasons for page info / posts
+- which score categories were excluded
+- whether followers came from page info or insights fallback
+
+### 5. Fix the report UI so it explains reality clearly
+Update:
+- `AuditReportPage.tsx`
+- `HeroScoreSection.tsx`
+- `ScoreExplanations.tsx`
+- `BasicReportPreview.tsx`
+
+Behavior:
+- show real followers if available from insights fallback
+- show range engagement totals from insights when post fetch fails
+- show `Unavailable` for post-level metrics that were not retrievable
+- replace the generic warning with exact reasons:
+  - broken post fetch
+  - permission restriction
   - no posts in selected range
-  - permission/API failure
-  - metric unavailable from Facebook
+- stop showing a misleading overall `0` when only some categories failed
 
-2. Make scoring genuine
-- calculate engagement/consistency/readiness only from real fetched inputs
-- exclude unavailable categories from the overall score instead of pretending data exists
-- compute a real Growth score only if follower-trend data is actually available; otherwise hide Growth entirely
+### 6. Verification on your real pages
+After implementation, re-run on:
+- MPG Solution
+- Nayaniti
 
-3. Make readiness/checklist real
-- fetch actual readiness-related page fields from Facebook
-- save a readiness checklist object in computed metrics
-- render checklist rows from real booleans, not score thresholds
+Verify:
+- followers are populated from a real source
+- selected duration is respected
+- posts are counted if Facebook allows retrieval
+- if posts still cannot be fetched, the report clearly says why and still shows real insight-based metrics
+- overall score is based only on retrievable real inputs
 
-4. Add Key Metrics to the full report
-- add a dedicated Key Metrics section to `AuditReportPage`
-- show at minimum:
-  - Followers
-  - Posts analyzed
-  - Engagement rate
-  - Avg. engagement/post
-  - Total engagements
-- use `—` only when the backend truly did not return that metric
-
-5. Fix report data wiring
-- use `input_data` instead of nonexistent `input_summary`
-- pass score inputs, readiness checklist, and range metadata from `get-audit-report`
-- keep the inline preview and full report on the same metric mapping
-
-6. Stop overstating data in the UI
-- remove the fake Growth fallback from the hero section
-- replace the fake readiness checklist logic
-- update alerts/empty states so they explain exactly why something is missing
-- update the date-range note so it reflects the real post-fix behavior
-
-7. Real verification after implementation
-- re-run an audit on the connected page with the chosen duration
-- compare the report with the actual page for:
-  - current follower count
-  - total posts inside the selected range
-  - engagement totals
-  - overall score after fake defaults are removed
-- verify that missing Facebook data shows as “Unavailable”, not as made-up values
-
-## Technical details
-Files to modify:
+## Files to update
 - `supabase/functions/run-audit/index.ts`
 - `supabase/functions/get-audit-report/index.ts`
 - `src/pages/dashboard/AuditReportPage.tsx`
-- `src/components/report/ScoreExplanations.tsx`
 - `src/components/report/HeroScoreSection.tsx`
+- `src/components/report/ScoreExplanations.tsx`
 - `src/components/audit/BasicReportPreview.tsx`
-- `src/components/audit/AuditFlow.tsx`
-- `src/components/audit/DateRangeSelector.tsx`
 
-Expected result:
-- Full report shows Key Metrics properly
-- Overall score is recalculated from real data only
-- Selected duration reflects all retrievable activity in that window
-- No more fake “1 post”, fake “3 posts/week”, fake Growth, or fake readiness checklist
+## Expected result
+After this fix, active pages will no longer look dead just because one Graph API request failed:
+- real followers should show
+- real range engagement should show
+- post metrics should show when retrievable
+- unavailable data should be labeled honestly
+- overall score should stop collapsing to fake-looking zero
