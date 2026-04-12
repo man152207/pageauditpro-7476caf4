@@ -65,34 +65,33 @@ const getPriorityIcon = (priority: string) => {
 function extractKeyMetrics(inputData: any, metrics: any): KeyMetric[] {
   const result: KeyMetric[] = [];
   
-  const followers = inputData?.page_fans || inputData?.followers || metrics?.followers;
+  // Field names match run-audit: followers, engagementRate, postsAnalyzed, postsPerWeek
+  const followers = inputData?.followers || metrics?.followers;
   if (followers) {
     result.push({
       label: 'Total Followers',
       value: Number(followers).toLocaleString(),
-      change: metrics?.follower_change ? `${metrics.follower_change > 0 ? '+' : ''}${metrics.follower_change}%` : undefined,
-      positive: metrics?.follower_change ? metrics.follower_change > 0 : undefined,
     });
   }
 
-  const engRate = metrics?.engagement_rate || inputData?.engagement_rate;
+  const engRate = inputData?.engagementRate || metrics?.engagementRate;
   if (engRate) {
     result.push({
       label: 'Engagement Rate',
-      value: `${Number(engRate).toFixed(1)}%`,
+      value: `${Number(engRate).toFixed(2)}%`,
       positive: true,
     });
   }
 
-  const reach = metrics?.avg_reach || inputData?.avg_reach;
-  if (reach) {
+  const avgEng = inputData?.avgEngagementPerPost || metrics?.avgEngagementPerPost;
+  if (avgEng) {
     result.push({
-      label: 'Avg. Post Reach',
-      value: Number(reach).toLocaleString(),
+      label: 'Avg. Engagement/Post',
+      value: Number(avgEng).toLocaleString(),
     });
   }
 
-  const posts = metrics?.total_posts || inputData?.posts_count || inputData?.total_posts;
+  const posts = inputData?.postsAnalyzed || metrics?.postsCount;
   if (posts) {
     result.push({
       label: 'Posts Analyzed',
@@ -105,7 +104,7 @@ function extractKeyMetrics(inputData: any, metrics: any): KeyMetric[] {
     const fillers = [
       { label: 'Total Followers', value: '—' },
       { label: 'Engagement Rate', value: '—' },
-      { label: 'Avg. Post Reach', value: '—' },
+      { label: 'Avg. Engagement/Post', value: '—' },
       { label: 'Posts Analyzed', value: '—' },
     ];
     const next = fillers.find(f => !result.some(r => r.label === f.label));

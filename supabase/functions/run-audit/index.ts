@@ -523,7 +523,10 @@ serve(async (req) => {
           totalLikes,
           totalComments,
           totalShares,
+          totalEngagements,
           postsAnalyzed: postsCount,
+          engagementRate: metrics.engagementRate,
+          avgEngagementPerPost: metrics.avgEngagementPerPost,
           dateRange: dateParams,
         },
         score_total: overallScore,
@@ -664,53 +667,55 @@ serve(async (req) => {
     });
     logStep("Best time to post computed", { slots: bestTimeToPost.length });
 
-    // Store detailed metrics for Pro users
-    if (hasProAccess) {
-      await supabase.from("audit_metrics").insert({
-        audit_id: audit.id,
-        raw_metrics: {
-          pageInfo,
-          insights,
-          posts: sortedPosts,
+    // Store detailed metrics for ALL users (basic for free, full for Pro)
+    const computedMetricsBase = {
+      ...metrics,
+      requestedRange: {
+        ...requestedRange,
+        appliedDates: dateParams,
+      },
+      paidVsOrganic,
+      postTypeAnalysis,
+      bestTimeToPost,
+      trendData,
+      postsAnalysis: {
+        top: topPosts,
+        needsWork: needsWorkPosts,
+        totalCount: posts.length,
+      },
+      benchmarks: {
+        postingFrequency: {
+          current: postsPerWeek,
+          target: 4,
+          unit: 'posts/week',
         },
-        computed_metrics: {
-          ...metrics,
-          requestedRange: {
-            ...requestedRange,
-            appliedDates: dateParams,
-          },
-          paidVsOrganic,
-          postTypeAnalysis,
-          bestTimeToPost,
-          trendData,
-          postsAnalysis: {
-            top: topPosts,
-            needsWork: needsWorkPosts,
-            totalCount: posts.length,
-          },
-          benchmarks: {
-            postingFrequency: {
-              current: postsPerWeek,
-              target: 4,
-              unit: 'posts/week',
-            },
-            engagementRate: {
-              current: metrics.engagementRate,
-              min: 1,
-              max: 3,
-            },
-          },
+        engagementRate: {
+          current: metrics.engagementRate,
+          min: 1,
+          max: 3,
         },
-        data_availability: dataAvailability,
-        demographics: demographics,
-      });
-      logStep("Metrics stored with date range and trends", { 
-        dateRange: dateParams,
-        hasTrendData,
-        topPostsCount: topPosts.length,
-        needsWorkCount: needsWorkPosts.length
-      });
-    }
+      },
+    };
+
+    await supabase.from("audit_metrics").insert({
+      audit_id: audit.id,
+      // Pro users get full raw_metrics (posts, insights); free users get null
+      raw_metrics: hasProAccess ? {
+        pageInfo,
+        insights,
+        posts: sortedPosts,
+      } : null,
+      computed_metrics: computedMetricsBase,
+      data_availability: dataAvailability,
+      demographics: hasProAccess ? demographics : null,
+    });
+    logStep("Metrics stored for all users", { 
+      hasProAccess,
+      dateRange: dateParams,
+      hasTrendData,
+      topPostsCount: topPosts.length,
+      needsWorkCount: needsWorkPosts.length
+    });
 
     // Create report record
     await supabase.from("reports").insert({

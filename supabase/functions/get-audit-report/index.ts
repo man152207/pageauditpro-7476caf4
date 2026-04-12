@@ -116,9 +116,9 @@ serve(async (req) => {
       has_pro_access: hasProAccess,
     };
 
-    // FREE tier: Only basic data + 10% metrics preview
+    // FREE tier: Basic metrics visible + Pro-only sections locked
     if (!hasProAccess) {
-      logStep("Returning FREE tier data with metrics preview");
+      logStep("Returning FREE tier data with basic metrics");
 
       // Only return first 2 recommendations for free users
       const allRecommendations = (audit.recommendations as any[]) || [];
@@ -126,43 +126,45 @@ serve(async (req) => {
         .filter((r: any) => !r.isPro)
         .slice(0, 2);
 
-      // Basic input data summary (no detailed metrics)
-      const inputData = audit.input_data as any || {};
-      const basicInputSummary = {
-        followers: inputData.followers || 0,
-        postsAnalyzed: inputData.postsAnalyzed || 0,
-      };
-
-      // Fetch partial metrics for 10% preview (only engagement rate)
+      // Fetch metrics (now stored for ALL users)
       const { data: metrics } = await supabase
         .from("audit_metrics")
-        .select("computed_metrics")
+        .select("computed_metrics, data_availability")
         .eq("audit_id", auditId)
         .maybeSingle();
 
-      const metricsPreview = metrics?.computed_metrics ? {
-        engagementRate: (metrics.computed_metrics as any).engagementRate || null,
-      } : null;
+      const computed = (metrics?.computed_metrics as any) || {};
+      
+      // Return basic metrics so free users see real data
+      const basicMetrics = {
+        followers: computed.followers || (audit.input_data as any)?.followers || 0,
+        engagementRate: computed.engagementRate || null,
+        avgEngagementPerPost: computed.avgEngagementPerPost || null,
+        postsCount: computed.postsCount || (audit.input_data as any)?.postsAnalyzed || 0,
+        postsPerWeek: computed.postsPerWeek || null,
+        totalLikes: computed.totalLikes || 0,
+        totalComments: computed.totalComments || 0,
+        totalShares: computed.totalShares || 0,
+        totalEngagements: computed.totalEngagements || 0,
+      };
 
       return new Response(
         JSON.stringify({
           ...baseResponse,
           recommendations: freeRecommendations,
-          input_summary: basicInputSummary,
-          detailed_metrics_preview: metricsPreview, // 10% preview - only engagement rate
-          // Pro-only fields are NOT included
-          // No full detailed_metrics
-          // No posts_analysis
-          // No demographics
-          // No ai_insights
+          input_data: audit.input_data,
+          detailed_metrics: basicMetrics,
+          data_availability: metrics?.data_availability || null,
+          // Pro-only fields NOT included
+          // No raw_metrics, posts_analysis, demographics, ai_insights
           locked_sections: [
-            "detailed_metrics",
-            "all_recommendations", 
             "posts_analysis",
             "demographics",
             "ai_insights",
             "pdf_export",
             "share_link",
+            "trend_data",
+            "best_time_to_post",
           ],
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
