@@ -186,7 +186,7 @@ export function PostTypeChart({
 
 // Best Time Heatmap (compact)
 interface HeatmapData {
-  day: string;
+  day: string | number;
   hour: number;
   value: number;
 }
