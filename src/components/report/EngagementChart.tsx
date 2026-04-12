@@ -214,10 +214,13 @@ export function BestTimeHeatmap({
   }
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayToIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
   const hours = [9, 12, 15, 18, 21]; // Key hours only
 
   const getHeatValue = (day: string, hour: number) => {
-    const point = data.find(d => d.day === day && d.hour === hour);
+    const idx = dayToIndex[day];
+    // Match by numeric day index (backend stores day as number) or string name
+    const point = data.find(d => (d.day === idx || d.day === day) && d.hour === hour);
     return point?.value || 0;
   };
 
