@@ -720,7 +720,7 @@ Powered by Pagelyzer
                     Demographics Unavailable
                   </p>
                   <p className="text-xs text-muted-foreground/70 mt-1 max-w-md mx-auto">
-                    {dataAvailability?.demographicsError || 'Facebook does not provide demographic data for this page. This is a Meta platform restriction related to privacy policies.'}
+                    {report.data_availability?.demographicsError || 'Facebook does not provide demographic data for this page. This is a Meta platform restriction related to privacy policies.'}
                   </p>
                 </div>
               )}
