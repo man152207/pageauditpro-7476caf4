@@ -299,20 +299,51 @@ serve(async (req) => {
         );
       }
 
-      // Upsert connection
+      // Exchange page token for a long-lived page token
+      let finalToken = access_token;
+      let tokenExpiresAt: string | null = null;
+
+      try {
+        const llUrl = `https://graph.facebook.com/v19.0/oauth/access_token?` +
+          `grant_type=fb_exchange_token&` +
+          `client_id=${FB_APP_ID}&` +
+          `client_secret=${FB_APP_SECRET}&` +
+          `fb_exchange_token=${access_token}`;
+        
+        const llRes = await fetch(llUrl);
+        const llData = await llRes.json();
+        
+        if (llData.access_token) {
+          finalToken = llData.access_token;
+          const llExpiresIn = llData.expires_in || 5184000; // ~60 days default
+          tokenExpiresAt = new Date(Date.now() + llExpiresIn * 1000).toISOString();
+          console.log(`[FB-OAUTH] Exchanged for long-lived token, expires in ${llExpiresIn}s`);
+        } else {
+          console.warn("[FB-OAUTH] Long-lived token exchange failed, using original token", llData.error);
+          // Use provided expires_in or default to 2 hours
+          if (expires_in) {
+            tokenExpiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+          }
+        }
+      } catch (e) {
+        console.warn("[FB-OAUTH] Long-lived token exchange error:", e);
+        if (expires_in) {
+          tokenExpiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+        }
+      }
+
+      // Upsert connection with long-lived token
       const { data, error } = await supabase
         .from("fb_connections")
         .upsert({
           user_id: userId,
           page_id,
           page_name,
-          access_token_encrypted: await encryptToken(access_token),
+          access_token_encrypted: await encryptToken(finalToken),
           scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "pages_read_user_content", "read_insights"],
           is_active: true,
           connected_at: new Date().toISOString(),
-          token_expires_at: expires_in 
-            ? new Date(Date.now() + expires_in * 1000).toISOString() 
-            : null,
+          token_expires_at: tokenExpiresAt,
         }, {
           onConflict: "user_id,page_id",
         })

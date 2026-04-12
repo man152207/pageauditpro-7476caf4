@@ -282,6 +282,42 @@ serve(async (req) => {
     const pageToken = await decryptToken(connection.access_token_encrypted);
     const pageId = connection.page_id;
 
+    // Validate token before proceeding
+    try {
+      const validateUrl = `https://graph.facebook.com/v21.0/${pageId}?fields=name&access_token=${pageToken}`;
+      const validateRes = await fetch(validateUrl);
+      const validateData = await validateRes.json();
+      
+      if (validateData.error) {
+        const errCode = validateData.error.code;
+        const errMsg = validateData.error.message || 'Unknown error';
+        logStep("Token validation FAILED", { code: errCode, message: errMsg });
+        
+        // Mark connection as needing reconnection
+        await supabase
+          .from("fb_connections")
+          .update({ token_expires_at: new Date(0).toISOString() })
+          .eq("id", connection_id);
+        
+        return new Response(
+          JSON.stringify({ 
+            error: "token_expired",
+            human_message: "Your Facebook connection has expired. Please disconnect and reconnect your page to get a fresh token.",
+            fix_steps: [
+              "Go to your connected pages list",
+              "Click 'Reconnect' on the affected page",
+              "Re-authorize with Facebook",
+              "Run the audit again"
+            ],
+          }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      logStep("Token validated successfully", { pageName: validateData.name });
+    } catch (e) {
+      logStep("Token validation error", { error: e });
+    }
+
     // Fetch page info from Facebook
     let pageInfo: any = {};
     let insights: any[] = [];
@@ -455,7 +491,7 @@ serve(async (req) => {
     }
 
     // Calculate metrics
-    const followers = pageInfo.followers_count || pageInfo.fan_count || 1000;
+    const followers = pageInfo.followers_count || pageInfo.fan_count || 0;
     let totalLikes = 0;
     let totalComments = 0;
     let totalShares = 0;
