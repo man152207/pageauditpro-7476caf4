@@ -114,15 +114,25 @@ export function CreativePreview({
                 <p className="text-xs opacity-80">engagements</p>
               </div>
               {creative.permalink_url && (
-                <a 
-                  href={creative.permalink_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+                <div className="flex items-center gap-1">
+                  <a 
+                    href={creative.permalink_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/80 hover:text-white"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3 w-3 text-white/60 cursor-help" onClick={(e) => e.stopPropagation()} />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[200px]">
+                      <p className="text-xs">Facebook links may be blocked in preview mode. They work normally on the live site.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               )}
             </div>
 
