@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://pagelyzer.io/sitemap.xml
+Sitemap: https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap
