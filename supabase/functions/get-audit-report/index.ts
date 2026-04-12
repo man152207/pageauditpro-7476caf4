@@ -73,6 +73,7 @@ serve(async (req) => {
       .from("audit_metrics").select("*").eq("audit_id", auditId).maybeSingle();
 
     const computed = (metrics?.computed_metrics as any) || {};
+    const dataAvail = (metrics?.data_availability as any) || {};
 
     const baseResponse: any = {
       id: audit.id,
@@ -86,7 +87,12 @@ serve(async (req) => {
       has_pro_access: hasProAccess,
       fb_connection_id: audit.fb_connection_id,
       input_data: audit.input_data,
-      data_availability: metrics?.data_availability || null,
+      data_availability: {
+        ...dataAvail,
+        followersSource: dataAvail.followersSource || computed.followersSource || 'unknown',
+        excludedScores: dataAvail.excludedScores || [],
+        scoreComponentsUsed: dataAvail.scoreComponentsUsed || [],
+      },
     };
 
     if (!hasProAccess) {
@@ -95,14 +101,16 @@ serve(async (req) => {
 
       const basicMetrics = {
         followers: computed.followers ?? (audit.input_data as any)?.followers ?? null,
+        followersSource: computed.followersSource ?? 'unknown',
         engagementRate: computed.engagementRate ?? null,
         avgEngagementPerPost: computed.avgEngagementPerPost ?? null,
-        postsCount: computed.postsCount ?? (audit.input_data as any)?.postsAnalyzed ?? 0,
+        postsCount: computed.postsCount ?? (audit.input_data as any)?.postsAnalyzed ?? null,
         postsPerWeek: computed.postsPerWeek ?? null,
-        totalLikes: computed.totalLikes ?? 0,
-        totalComments: computed.totalComments ?? 0,
-        totalShares: computed.totalShares ?? 0,
-        totalEngagements: computed.totalEngagements ?? 0,
+        totalLikes: computed.totalLikes ?? null,
+        totalComments: computed.totalComments ?? null,
+        totalShares: computed.totalShares ?? null,
+        totalEngagements: computed.totalEngagements ?? null,
+        insightTotalEngagements: computed.insightTotalEngagements ?? null,
         readinessChecklist: computed.readinessChecklist ?? null,
       };
 

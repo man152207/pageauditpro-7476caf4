@@ -31,15 +31,16 @@ function getDateRangeFromPreset(preset: string): { since: string; until: string 
   return { since: String(Math.floor(since.getTime() / 1000)), until: String(untilTs) };
 }
 
-// Paginate through ALL posts in the date range
+// Paginate through ALL posts — SAFE fields only (no deprecated `type`, `caption`, `description`, `link`, `name`, `source`, `object_id`)
 async function fetchAllPosts(pageId: string, pageToken: string, since: string, until: string): Promise<{ posts: any[]; error?: string }> {
   const allPosts: any[] = [];
+  // Only request fields that are NOT deprecated in v3.3+
+  const safeFields = 'id,message,created_time,shares,likes.summary(true),comments.summary(true),permalink_url,full_picture,is_published';
   let nextUrl: string | null = `https://graph.facebook.com/v21.0/${pageId}/posts?` +
-    `fields=id,message,created_time,shares,likes.summary(true),comments.summary(true),type,permalink_url,full_picture&` +
-    `since=${since}&until=${until}&limit=100&access_token=${pageToken}`;
+    `fields=${safeFields}&since=${since}&until=${until}&limit=100&access_token=${pageToken}`;
 
   let page = 0;
-  const maxPages = 20; // Safety limit: 20 * 100 = 2000 posts max
+  const maxPages = 20;
 
   while (nextUrl && page < maxPages) {
     try {
@@ -48,23 +49,53 @@ async function fetchAllPosts(pageId: string, pageToken: string, since: string, u
       if (data.error) {
         logStep("Posts API error on page " + page, data.error);
         if (page === 0) return { posts: [], error: data.error.message };
-        break; // Return what we have so far
+        break;
       }
       const pagePosts = data.data || [];
       allPosts.push(...pagePosts);
       logStep(`Posts page ${page} fetched`, { count: pagePosts.length, total: allPosts.length });
-      
       nextUrl = data.paging?.next || null;
       page++;
     } catch (e) {
       logStep("Posts fetch error on page " + page, { error: String(e) });
+      if (page === 0) return { posts: [], error: String(e) };
       break;
     }
   }
   return { posts: allPosts };
 }
 
-// Calculate engagement score from REAL data only
+// Fetch page info in TWO safe stages to avoid permission cascading failures
+async function fetchPageInfo(pageId: string, pageToken: string): Promise<{ data: any; error?: string }> {
+  // Stage 1: basic fields (almost always available)
+  const basicFields = 'name,category,picture,cover,about,description,website,phone,emails,single_line_address,location,hours,link';
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${pageId}?fields=${basicFields}&access_token=${pageToken}`);
+    const data = await res.json();
+    if (data.error) {
+      logStep("Page info basic fields error", data.error);
+      return { data: {}, error: data.error.message };
+    }
+
+    // Stage 2: try followers_count separately (requires pages_read_engagement)
+    try {
+      const res2 = await fetch(`https://graph.facebook.com/v21.0/${pageId}?fields=followers_count,fan_count&access_token=${pageToken}`);
+      const data2 = await res2.json();
+      if (!data2.error) {
+        data.followers_count = data2.followers_count;
+        data.fan_count = data2.fan_count;
+      } else {
+        logStep("Followers count field error (non-fatal)", data2.error);
+      }
+    } catch (_e) { /* non-fatal */ }
+
+    return { data };
+  } catch (e) {
+    logStep("Page info fetch failed entirely", { error: String(e) });
+    return { data: {}, error: String(e) };
+  }
+}
+
 function calculateEngagementScore(totalEngagements: number, followers: number, postsCount: number): number | null {
   if (!followers || followers === 0 || !postsCount || postsCount === 0) return null;
   const avgEngagementPerPost = totalEngagements / postsCount;
@@ -76,7 +107,18 @@ function calculateEngagementScore(totalEngagements: number, followers: number, p
   return Math.max(10, Math.round(engagementRate * 20));
 }
 
-// Calculate consistency score - only if we have real post data
+// Engagement score from page-level insights (fallback when posts fail)
+function calculateInsightEngagementScore(totalInsightEngagements: number, followers: number, dayCount: number): number | null {
+  if (!followers || followers === 0 || dayCount === 0) return null;
+  // daily engagement rate
+  const dailyRate = (totalInsightEngagements / dayCount / followers) * 100;
+  if (dailyRate >= 0.5) return 100;
+  if (dailyRate >= 0.3) return 85;
+  if (dailyRate >= 0.1) return 65;
+  if (dailyRate >= 0.05) return 45;
+  return Math.max(10, Math.round(dailyRate * 200));
+}
+
 function calculateConsistencyScore(postsPerWeek: number | null): number | null {
   if (postsPerWeek === null) return null;
   if (postsPerWeek >= 7) return 100;
@@ -87,7 +129,6 @@ function calculateConsistencyScore(postsPerWeek: number | null): number | null {
   return 10;
 }
 
-// Calculate readiness score from REAL page fields
 function calculateReadinessScore(checklist: Record<string, boolean>): number {
   const items = Object.values(checklist);
   if (items.length === 0) return 0;
@@ -147,6 +188,24 @@ function buildTimeSeries(insights: any[], metricName: string): { date: string; v
     date: v.end_time?.split('T')[0] || '',
     value: v.value || 0,
   })).filter((v: any) => v.date);
+}
+
+// Extract total from a page-level insight time series
+function sumInsightValues(insights: any[], metricName: string): number {
+  const metric = insights.find(m => m.name === metricName);
+  if (!metric?.values?.length) return 0;
+  return metric.values.reduce((sum: number, v: any) => sum + (v.value || 0), 0);
+}
+
+// Get the latest non-zero value from insight time series
+function latestInsightValue(insights: any[], metricName: string): number | null {
+  const metric = insights.find(m => m.name === metricName);
+  if (!metric?.values?.length) return null;
+  // Values are chronological; take the last non-zero
+  for (let i = metric.values.length - 1; i >= 0; i--) {
+    if (metric.values[i].value > 0) return metric.values[i].value;
+  }
+  return null;
 }
 
 serve(async (req) => {
@@ -232,7 +291,7 @@ serve(async (req) => {
     const pageToken = await decryptToken(connection.access_token_encrypted);
     const pageId = connection.page_id;
 
-    // Validate token
+    // Validate token with minimal request
     try {
       const validateRes = await fetch(`https://graph.facebook.com/v21.0/${pageId}?fields=name&access_token=${pageToken}`);
       const validateData = await validateRes.json();
@@ -248,32 +307,22 @@ serve(async (req) => {
     } catch (e) { logStep("Token validation error", { error: e }); }
 
     // ========== FETCH REAL DATA ==========
-    let pageInfo: any = {};
-    let insights: any[] = [];
     const dataAvailability: any = {};
 
-    // 1. Page info with REAL readiness fields
-    try {
-      const pageInfoUrl = `https://graph.facebook.com/v21.0/${pageId}?` +
-        `fields=name,followers_count,fan_count,about,category,website,phone,picture,cover,description,` +
-        `emails,single_line_address,location,hours,link,call_to_actions&` +
-        `access_token=${pageToken}`;
-      const pageInfoRes = await fetch(pageInfoUrl);
-      pageInfo = await pageInfoRes.json();
-      dataAvailability.pageInfo = !pageInfo.error;
-      logStep("Page info fetched", { 
-        success: !pageInfo.error, 
-        followers: pageInfo.followers_count || pageInfo.fan_count,
-        hasAbout: !!pageInfo.about,
-        hasPicture: !!pageInfo.picture,
-        hasCover: !!pageInfo.cover,
-      });
-    } catch (e) {
-      logStep("Page info fetch failed", { error: e });
-      dataAvailability.pageInfo = false;
-    }
+    // 1. Page info — safe 2-stage fetch
+    const { data: pageInfo, error: pageInfoError } = await fetchPageInfo(pageId, pageToken);
+    dataAvailability.pageInfo = !pageInfoError;
+    if (pageInfoError) dataAvailability.pageInfoError = pageInfoError;
+    logStep("Page info fetched", {
+      success: !pageInfoError,
+      followers: pageInfo.followers_count || pageInfo.fan_count,
+      hasAbout: !!pageInfo.about,
+      hasPicture: !!pageInfo.picture,
+      hasCover: !!pageInfo.cover,
+    });
 
     // 2. Insights with date range
+    let insights: any[] = [];
     try {
       const insightsUrl = `https://graph.facebook.com/v21.0/${pageId}/insights?` +
         `metric=page_media_view,page_post_engagements,page_follows&` +
@@ -293,25 +342,20 @@ serve(async (req) => {
       dataAvailability.insights = false;
     }
 
-    // 3. Posts - PAGINATED through full date range
+    // 3. Posts — safe fields, full pagination
     const { posts, error: postsError } = await fetchAllPosts(pageId, pageToken, dateParams.since, dateParams.until);
-    if (postsError) {
-      dataAvailability.posts = false;
-      const errCode = postsError.includes('permission') ? 'permission_not_granted' : postsError;
-      dataAvailability.postsError = errCode;
-    } else {
-      dataAvailability.posts = posts.length > 0;
-    }
-    logStep("All posts fetched", { totalPosts: posts.length });
+    dataAvailability.posts = !postsError && posts.length > 0;
+    if (postsError) dataAvailability.postsError = postsError;
+    dataAvailability.postsCount = posts.length;
+    logStep("All posts fetched", { totalPosts: posts.length, error: postsError || 'none' });
 
-    // 4. Post-level insights (for ALL fetched posts, not just 25)
+    // 4. Post-level insights
     let postInsights: Record<string, any> = {};
     let totalPaidImpressions = 0;
     let totalOrganicImpressions = 0;
     let hasAnyPostInsights = false;
 
     if (posts.length > 0) {
-      // Fetch insights for up to 50 posts
       const postIds = posts.slice(0, 50).map((p: any) => p.id);
       for (const postId of postIds) {
         try {
@@ -354,27 +398,38 @@ serve(async (req) => {
           dataAvailability.demographics = true;
         } else {
           dataAvailability.demographics = false;
-          dataAvailability.demographicsError = 'Demographics metrics deprecated by Meta (March 2024).';
+          dataAvailability.demographicsError = demoData.error?.message || 'Demographics not available';
         }
       } catch (_e) {
         dataAvailability.demographics = false;
       }
     }
 
-    // ========== COMPUTE REAL METRICS ==========
-    const followers = pageInfo.followers_count || pageInfo.fan_count || null;
-    let totalLikes = 0, totalComments = 0, totalShares = 0;
+    // ========== COMPUTE REAL METRICS (with insight fallbacks) ==========
 
+    // Followers: try pageInfo first, then insight fallback
+    const pageInfoFollowers = pageInfo.followers_count || pageInfo.fan_count || null;
+    const insightFollowers = latestInsightValue(insights, 'page_follows');
+    const followers = pageInfoFollowers || insightFollowers || null;
+    const followersSource = pageInfoFollowers ? 'page_info' : insightFollowers ? 'insights_fallback' : 'unavailable';
+    dataAvailability.followersSource = followersSource;
+    logStep("Followers resolved", { pageInfoFollowers, insightFollowers, final: followers, source: followersSource });
+
+    // Post-level engagement totals
+    let totalLikes = 0, totalComments = 0, totalShares = 0;
     posts.forEach((post: any) => {
       totalLikes += post.likes?.summary?.total_count || 0;
       totalComments += post.comments?.summary?.total_count || 0;
       totalShares += post.shares?.count || 0;
     });
-
     const totalEngagements = totalLikes + totalComments + totalShares;
-    const postsCount = posts.length; // REAL count, no || 1 fallback
+    const postsCount = posts.length;
 
-    // Posts per week - REAL calculation only if we have posts
+    // Insight-level engagement (fallback)
+    const insightTotalEngagements = sumInsightValues(insights, 'page_post_engagements');
+    const rangeDays = Math.max(1, (Number(dateParams.until) - Number(dateParams.since)) / 86400);
+
+    // Posts per week
     let postsPerWeek: number | null = null;
     if (posts.length >= 2) {
       const firstPost = new Date(posts[posts.length - 1].created_time);
@@ -382,29 +437,31 @@ serve(async (req) => {
       const daysDiff = Math.max(1, (lastPost.getTime() - firstPost.getTime()) / (1000 * 60 * 60 * 24));
       postsPerWeek = Math.round((posts.length / daysDiff) * 7 * 10) / 10;
     } else if (posts.length === 1) {
-      // Single post in the range - calculate from date range span
-      const rangeDays = (Number(dateParams.until) - Number(dateParams.since)) / 86400;
       postsPerWeek = rangeDays > 0 ? Math.round((1 / rangeDays) * 7 * 10) / 10 : null;
     }
-    // If 0 posts, postsPerWeek stays null
 
-    const engagementRate = (followers && postsCount > 0) 
-      ? Math.round((totalEngagements / postsCount / followers) * 10000) / 100 
+    const engagementRate = (followers && postsCount > 0)
+      ? Math.round((totalEngagements / postsCount / followers) * 10000) / 100
       : null;
-    const avgEngagementPerPost = postsCount > 0 
-      ? Math.round((totalEngagements / postsCount) * 10) / 10 
+    const avgEngagementPerPost = postsCount > 0
+      ? Math.round((totalEngagements / postsCount) * 10) / 10
       : null;
 
-    // Find top post type
+    // Detect post media type from full_picture presence (since `type` is deprecated)
     let topPostType: string | null = null;
     if (posts.length > 0) {
       const typeCounts: Record<string, number> = {};
-      posts.forEach((p: any) => { const t = p.type || 'status'; typeCounts[t] = (typeCounts[t] || 0) + 1; });
-      topPostType = Object.entries(typeCounts).sort(([,a],[,b]) => b - a)[0]?.[0] || null;
+      posts.forEach((p: any) => {
+        // Infer type from available data since `type` field is deprecated
+        const inferredType = p.full_picture ? 'photo' : 'status';
+        typeCounts[inferredType] = (typeCounts[inferredType] || 0) + 1;
+      });
+      topPostType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || null;
     }
 
     // ========== REAL READINESS CHECKLIST ==========
-    const readinessChecklist: Record<string, boolean> = {
+    const hasPageInfoData = dataAvailability.pageInfo;
+    const readinessChecklist: Record<string, boolean> | null = hasPageInfoData ? {
       profile_photo: !!(pageInfo.picture && pageInfo.picture.data && !pageInfo.picture.data.is_silhouette),
       cover_photo: !!(pageInfo.cover),
       page_description: !!(pageInfo.about || pageInfo.description),
@@ -412,33 +469,61 @@ serve(async (req) => {
       website: !!(pageInfo.website),
       category: !!(pageInfo.category),
       address: !!(pageInfo.single_line_address || pageInfo.location),
-    };
-    logStep("Readiness checklist (real)", readinessChecklist);
+    } : null;
 
-    // ========== GENUINE SCORING ==========
-    const engagementScore = calculateEngagementScore(totalEngagements, followers || 0, postsCount);
+    if (readinessChecklist) {
+      logStep("Readiness checklist (real)", readinessChecklist);
+    } else {
+      logStep("Readiness checklist unavailable - page info fetch failed");
+    }
+
+    // ========== GENUINE SCORING WITH FALLBACKS ==========
+    // Engagement: prefer post-level, fallback to insight-level
+    let engagementScore: number | null = null;
+    let engagementSource = 'unavailable';
+    if (postsCount > 0 && followers) {
+      engagementScore = calculateEngagementScore(totalEngagements, followers, postsCount);
+      engagementSource = 'posts';
+    } else if (insightTotalEngagements > 0 && followers) {
+      engagementScore = calculateInsightEngagementScore(insightTotalEngagements, followers, rangeDays);
+      engagementSource = 'insights_fallback';
+    }
+
+    // Consistency: only from real post data
     const consistencyScore = calculateConsistencyScore(postsPerWeek);
-    const readinessScore = calculateReadinessScore(readinessChecklist);
 
-    // Only include available scores in the overall calculation
-    const scoreComponents: { score: number; weight: number }[] = [];
-    if (engagementScore !== null) scoreComponents.push({ score: engagementScore, weight: 0.4 });
-    if (consistencyScore !== null) scoreComponents.push({ score: consistencyScore, weight: 0.35 });
-    scoreComponents.push({ score: readinessScore, weight: 0.25 }); // Always available from page info
+    // Readiness: only when page info succeeded
+    const readinessScore = readinessChecklist ? calculateReadinessScore(readinessChecklist) : null;
 
-    // Normalize weights if some scores are missing
+    // Overall: only from available scores, normalize weights
+    const scoreComponents: { name: string; score: number; weight: number }[] = [];
+    if (engagementScore !== null) scoreComponents.push({ name: 'engagement', score: engagementScore, weight: 0.4 });
+    if (consistencyScore !== null) scoreComponents.push({ name: 'consistency', score: consistencyScore, weight: 0.35 });
+    if (readinessScore !== null) scoreComponents.push({ name: 'readiness', score: readinessScore, weight: 0.25 });
+
     const totalWeight = scoreComponents.reduce((sum, c) => sum + c.weight, 0);
     const overallScore = totalWeight > 0
       ? Math.round(scoreComponents.reduce((sum, c) => sum + c.score * (c.weight / totalWeight), 0))
-      : 0;
+      : null;
 
     const scores: any = {
       overall: overallScore,
-      engagement: engagementScore, // null if unavailable
-      consistency: consistencyScore, // null if unavailable
+      engagement: engagementScore,
+      consistency: consistencyScore,
       readiness: readinessScore,
     };
-    logStep("Scores calculated (genuine)", scores);
+    
+    // Track which scores were excluded
+    const excludedScores: string[] = [];
+    if (engagementScore === null) excludedScores.push('engagement');
+    if (consistencyScore === null) excludedScores.push('consistency');
+    if (readinessScore === null) excludedScores.push('readiness');
+
+    dataAvailability.engagementSource = engagementSource;
+    dataAvailability.excludedScores = excludedScores;
+    dataAvailability.scoreComponentsUsed = scoreComponents.map(c => c.name);
+
+    logStep("Scores calculated (genuine)", { scores, excludedScores, engagementSource });
 
     const recommendations = generateRecommendations(scores, { topPostType }, hasProAccess);
 
@@ -452,15 +537,17 @@ serve(async (req) => {
         page_url: `https://facebook.com/${pageId}`,
         input_data: {
           followers,
+          followersSource,
           postsPerWeek,
           totalLikes, totalComments, totalShares, totalEngagements,
+          insightTotalEngagements,
           postsAnalyzed: postsCount,
           engagementRate,
           avgEngagementPerPost,
           dateRange: dateParams,
           requestedRange,
         },
-        score_total: overallScore,
+        score_total: overallScore ?? 0,
         score_breakdown: scores,
         recommendations: recommendations.filter(r => !r.isPro || hasProAccess),
         is_pro_unlocked: hasProAccess,
@@ -498,9 +585,10 @@ serve(async (req) => {
     const sortedPosts = [...posts].map((p: any) => {
       const pInsight = postInsights[p.id] || {};
       const engagement = (p.likes?.summary?.total_count || 0) + (p.comments?.summary?.total_count || 0) + (p.shares?.count || 0);
+      const inferredType = p.full_picture ? 'photo' : 'status';
       return {
-        id: p.id, type: p.type, created_time: p.created_time, message: p.message,
-        permalink_url: p.permalink_url, full_picture: p.full_picture, media_type: p.type || 'status',
+        id: p.id, type: inferredType, created_time: p.created_time, message: p.message,
+        permalink_url: p.permalink_url, full_picture: p.full_picture, media_type: inferredType,
         likes: p.likes?.summary?.total_count || 0, comments: p.comments?.summary?.total_count || 0,
         shares: p.shares?.count || 0, engagement,
         impressions: pInsight.post_impressions || null,
@@ -518,11 +606,10 @@ serve(async (req) => {
 
     // Post type analysis
     const postTypeStats: Record<string, { total: number; count: number }> = {};
-    posts.forEach((p: any) => {
+    sortedPosts.forEach((p: any) => {
       const type = p.type || 'status';
       if (!postTypeStats[type]) postTypeStats[type] = { total: 0, count: 0 };
-      const eng = (p.likes?.summary?.total_count || 0) + (p.comments?.summary?.total_count || 0) + (p.shares?.count || 0);
-      postTypeStats[type].total += eng;
+      postTypeStats[type].total += p.engagement;
       postTypeStats[type].count += 1;
     });
     const postTypeAnalysis = Object.entries(postTypeStats).map(([type, stats]) => ({
@@ -547,7 +634,9 @@ serve(async (req) => {
     // Store metrics for ALL users
     const computedMetrics = {
       followers,
+      followersSource,
       totalEngagements, totalLikes, totalComments, totalShares,
+      insightTotalEngagements,
       postsCount,
       postsPerWeek,
       avgEngagementPerPost,
@@ -573,7 +662,7 @@ serve(async (req) => {
       data_availability: dataAvailability,
       demographics: hasProAccess ? demographics : null,
     });
-    logStep("Metrics stored", { postsCount, followers, engagementRate, hasTrendData });
+    logStep("Metrics stored", { postsCount, followers, followersSource, engagementRate, insightTotalEngagements, hasTrendData, excludedScores });
 
     await supabase.from("reports").insert({ audit_id: audit.id, is_public: false });
 
@@ -581,6 +670,8 @@ serve(async (req) => {
       success: true, audit_id: audit.id, scores,
       is_pro: isPro, date_range_applied: dateParams,
       posts_fetched: posts.length, has_trend_data: hasTrendData,
+      followers_source: followersSource,
+      excluded_scores: excludedScores,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (error: unknown) {
