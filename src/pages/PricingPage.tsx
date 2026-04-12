@@ -130,6 +130,8 @@ export default function PricingPage() {
   const isPlanPopular = (plan: DbPlan) => plan.name === 'Pro Monthly';
   const isPlanPro = (plan: DbPlan) => plan.price > 0;
 
+  const { seoContent } = usePageSeoContent('/pricing');
+
   if (loading) {
     return (
       <div className="py-20 lg:py-28">
@@ -139,8 +141,6 @@ export default function PricingPage() {
       </div>
     );
   }
-
-  const { seoContent } = usePageSeoContent('/pricing');
 
   return (
     <div>
