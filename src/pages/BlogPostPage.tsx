@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Loader2, Tag, User } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface BlogPost {
   id: string;
@@ -126,8 +127,8 @@ export default function BlogPostPage() {
         )}
 
         {/* Full blog content - no truncation */}
-        <article className="prose prose-neutral dark:prose-invert max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }} />
+        <article className="prose prose-neutral dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-li:text-muted-foreground">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
         </article>
       </div>
     </div>
