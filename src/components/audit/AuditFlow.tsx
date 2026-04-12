@@ -94,7 +94,7 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
     try {
       const { data, error } = await supabase
         .from('fb_connections')
-        .select('*')
+        .select('id, page_id, page_name, is_active, connected_at, token_expires_at')
         .eq('user_id', user?.id)
         .eq('is_active', true)
         .order('connected_at', { ascending: false });
