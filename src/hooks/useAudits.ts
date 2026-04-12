@@ -185,7 +185,10 @@ export function useRunAudit() {
 
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.error || 'Failed to run audit');
+        const err = new Error(errData.human_message || errData.error || 'Failed to run audit');
+        (err as any).code = errData.error;
+        (err as any).fix_steps = errData.fix_steps;
+        throw err;
       }
 
       return await response.json();
