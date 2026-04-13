@@ -7,8 +7,7 @@
   # These require mod_proxy to be enabled
   # ============================================
   
-  # Sitemap - redirect to edge function (mod_proxy not available on host)
-  RewriteRule ^sitemap\.xml$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap [R=302,L,NE]
+  # Sitemap is now served as a static file (generated at build time)
   
   # Stripe Webhook - proxy to edge function
   RewriteRule ^api/webhooks/stripe$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/stripe-webhook [P,L]
