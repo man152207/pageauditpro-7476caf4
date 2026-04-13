@@ -56,6 +56,9 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@tanstack/react-query"],
+  },
   plugins: [react(), mode === "development" && componentTagger(), generateSitemap()].filter(Boolean),
   resolve: {
     alias: {
