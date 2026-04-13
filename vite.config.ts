@@ -31,10 +31,11 @@ function generateSitemap(): Plugin {
         console.log("✅ sitemap.xml written to dist/ (dynamic)");
       } catch (err: any) {
         console.warn(
-          "⚠️  Edge function fetch failed, fallback from public/ will be used:",
+          "⚠️  Edge function fetch failed, writing fallback sitemap:",
           err.message,
         );
-        // fallback already copied from public/ by Vite — no action needed
+        writeFileSync("dist/sitemap.xml", SITEMAP_FALLBACK, "utf-8");
+        console.log("✅ sitemap.xml fallback written to dist/");
       }
     },
   };
