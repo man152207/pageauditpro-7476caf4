@@ -1,48 +1,34 @@
 
 
-# Fix: Sitemap.xml on Lovable Hosting
+# Fix: Sitemap.xml — Vite Plugin approach
 
-## Root Cause
-`pagelyzer.io` resolves to Lovable hosting (`pageauditpro.lovable.app`), NOT to the cPanel server. Lovable hosting:
-- Does NOT process `.htaccess` files
-- Treats paths with file extensions (like `.xml`) as static asset requests
-- Returns 404 if the file doesn't exist in the build output
+## Problem
+`scripts/generate-sitemap.mjs` runs as a **post-build shell command** (`vite build && node scripts/...`). Lovable's internal build system likely runs only `vite build` directly and ignores the `&&` chain. So `sitemap.xml` never appears in the build output on Lovable hosting.
 
-The `.htaccess` redirect fix was correct for cPanel but irrelevant here.
+The `.htaccess` redirect also doesn't work because Lovable hosting ignores `.htaccess` files.
 
 ## Solution
+Move the sitemap generation **inside** `vite build` itself as a **Vite plugin**. This guarantees it runs regardless of how the build is triggered (Lovable, GitHub Actions, or local).
 
-Generate a static `sitemap.xml` at build time by calling the edge function during the build step.
+### Changes
 
-### Step 1: Add a build script to fetch and save sitemap
+**1. `vite.config.ts` — Add a custom Vite plugin**
 
-Create `scripts/generate-sitemap.mjs` that:
-- Calls the Supabase edge function (`/functions/v1/sitemap`)
-- Saves the XML response to `dist/sitemap.xml`
-- Falls back to a minimal valid sitemap if the fetch fails
+Add a `generateSitemap()` plugin that runs in the `closeBundle` hook (fires at the end of every build). It fetches the XML from the edge function and writes `dist/sitemap.xml`, with a fallback if the fetch fails.
 
-### Step 2: Update `package.json` build command
+**2. `package.json` — Revert build script**
 
-Change `"build": "vite build"` to:
-```
-"build": "vite build && node scripts/generate-sitemap.mjs"
-```
+Change back to `"build": "vite build"` since the plugin handles sitemap generation internally.
 
-This ensures every publish generates a fresh `sitemap.xml` in the `dist/` folder.
+**3. `scripts/generate-sitemap.mjs` — Keep as-is**
 
-### Step 3: Update `robots.txt`
+Keep the standalone script for manual use / cPanel GitHub Actions, but the Vite plugin is the primary mechanism now.
 
-Keep the `Sitemap:` line pointing to `https://pagelyzer.io/sitemap.xml` (the static file will now exist).
+### Why this works
+- Vite plugins run as part of `vite build` itself — no shell chaining needed
+- Works on Lovable hosting, cPanel (via GitHub Actions), and local builds
+- The `closeBundle` hook runs after all files are written to `dist/`, so the sitemap file will be included in the final output
 
-### Step 4: Revert unnecessary `.htaccess` sitemap rule
-
-The redirect rule is harmless but misleading since it's not used on Lovable hosting. Add a comment clarifying this.
-
-## Why not a `public/sitemap.xml` static file?
-A static file in `public/` would go stale. The build-time generation ensures fresh data from the database on every publish while still serving a real `.xml` file.
-
-## Result
-- `https://pagelyzer.io/sitemap.xml` will serve valid XML (static file generated at build time)
-- Content refreshes on every Publish
-- No server-side redirect or proxy needed
+### Expected result
+After publishing: `https://pagelyzer.io/sitemap.xml` serves valid XML on both Lovable hosting and cPanel.
 
