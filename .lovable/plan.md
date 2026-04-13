@@ -1,34 +1,35 @@
 
 
-# Fix: Sitemap.xml — Vite Plugin approach
+# Fix: Sitemap.xml — Write to `public/` before build
 
 ## Problem
-`scripts/generate-sitemap.mjs` runs as a **post-build shell command** (`vite build && node scripts/...`). Lovable's internal build system likely runs only `vite build` directly and ignores the `&&` chain. So `sitemap.xml` never appears in the build output on Lovable hosting.
+The `closeBundle` Vite plugin writes `sitemap.xml` to `dist/` **after** the build completes, but Lovable's deploy pipeline likely snapshots `dist/` before this hook fires. The file never makes it into the deployed artifact.
 
-The `.htaccess` redirect also doesn't work because Lovable hosting ignores `.htaccess` files.
+Both `pagelyzer.io/sitemap.xml` and `pageauditpro.lovable.app/sitemap.xml` return React's 404 page, confirming the physical file is missing from the deployment.
 
 ## Solution
-Move the sitemap generation **inside** `vite build` itself as a **Vite plugin**. This guarantees it runs regardless of how the build is triggered (Lovable, GitHub Actions, or local).
+Change the Vite plugin to write `sitemap.xml` into the `public/` folder during the `buildStart` hook (runs **before** Vite copies `public/` to `dist/`). Vite always copies everything from `public/` into `dist/` — this is guaranteed behavior.
 
-### Changes
+## Changes
 
-**1. `vite.config.ts` — Add a custom Vite plugin**
+### 1. `vite.config.ts` — Change hook from `closeBundle` to `buildStart`
+- Write the fetched XML to **`public/sitemap.xml`** instead of `dist/sitemap.xml`
+- Use `buildStart` hook so the file exists before Vite copies `public/` → `dist/`
 
-Add a `generateSitemap()` plugin that runs in the `closeBundle` hook (fires at the end of every build). It fetches the XML from the edge function and writes `dist/sitemap.xml`, with a fallback if the fetch fails.
+### 2. `.gitignore` — Add `public/sitemap.xml`
+- Since the file is auto-generated, it should not be committed to Git
 
-**2. `package.json` — Revert build script**
+### 3. No other changes needed
+- `robots.txt` already points to `https://pagelyzer.io/sitemap.xml`
+- Edge function and standalone script remain as-is
 
-Change back to `"build": "vite build"` since the plugin handles sitemap generation internally.
-
-**3. `scripts/generate-sitemap.mjs` — Keep as-is**
-
-Keep the standalone script for manual use / cPanel GitHub Actions, but the Vite plugin is the primary mechanism now.
-
-### Why this works
-- Vite plugins run as part of `vite build` itself — no shell chaining needed
+## Why this will work
+- Vite **always** copies `public/*` to `dist/` — this is core Vite behavior, not dependent on any hosting platform
+- `buildStart` runs before file emission, so the sitemap will be in `public/` when Vite copies it
 - Works on Lovable hosting, cPanel (via GitHub Actions), and local builds
-- The `closeBundle` hook runs after all files are written to `dist/`, so the sitemap file will be included in the final output
 
-### Expected result
-After publishing: `https://pagelyzer.io/sitemap.xml` serves valid XML on both Lovable hosting and cPanel.
+## After implementation
+- Publish the site
+- Purge Cloudflare cache
+- Verify `https://pagelyzer.io/sitemap.xml` returns XML
 
