@@ -1,35 +1,48 @@
 
 
-# Fix: Sitemap.xml — Write to `public/` before build
+# Debug .htaccess Sitemap Redirect
 
-## Problem
-The `closeBundle` Vite plugin writes `sitemap.xml` to `dist/` **after** the build completes, but Lovable's deploy pipeline likely snapshots `dist/` before this hook fires. The file never makes it into the deployed artifact.
+## Diagnosis
 
-Both `pagelyzer.io/sitemap.xml` and `pageauditpro.lovable.app/sitemap.xml` return React's 404 page, confirming the physical file is missing from the deployment.
+The `.htaccess` redirect rule on line 11 is **correct**:
+```
+RewriteRule ^sitemap\.xml$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap [R=302,L,NE]
+```
 
-## Solution
-Change the Vite plugin to write `sitemap.xml` into the `public/` folder during the `buildStart` hook (runs **before** Vite copies `public/` to `dist/`). Vite always copies everything from `public/` into `dist/` — this is guaranteed behavior.
+This should issue a 302 redirect before the SPA fallback ever fires. Yet `/sitemap.xml` returns HTML. Two likely causes:
 
-## Changes
+### Cause 1: Cloudflare Cache (most likely)
+Your `robots.txt` confirms Cloudflare is actively proxying traffic (it prepends its managed bot rules). Cloudflare likely cached the old HTML 404 response for `/sitemap.xml` **before** the redirect rule was added to `.htaccess`.
 
-### 1. `vite.config.ts` — Change hook from `closeBundle` to `buildStart`
-- Write the fetched XML to **`public/sitemap.xml`** instead of `dist/sitemap.xml`
-- Use `buildStart` hook so the file exists before Vite copies `public/` → `dist/`
+### Cause 2: Latest .htaccess not deployed
+The GitHub Actions workflow deploys `dist/` via FTPS. If the last deploy failed or hasn't run since the rule was added, the old `.htaccess` (without the sitemap rule) is still on cPanel.
 
-### 2. `.gitignore` — Add `public/sitemap.xml`
-- Since the file is auto-generated, it should not be committed to Git
+## Fix Steps (no code changes needed)
 
-### 3. No other changes needed
-- `robots.txt` already points to `https://pagelyzer.io/sitemap.xml`
-- Edge function and standalone script remain as-is
+### Step 1: Verify latest deploy ran
+- Go to your GitHub repo → **Actions** tab
+- Check the most recent "Deploy to cPanel" run succeeded
+- If it failed or hasn't run, trigger it manually via **workflow_dispatch**
 
-## Why this will work
-- Vite **always** copies `public/*` to `dist/` — this is core Vite behavior, not dependent on any hosting platform
-- `buildStart` runs before file emission, so the sitemap will be in `public/` when Vite copies it
-- Works on Lovable hosting, cPanel (via GitHub Actions), and local builds
+### Step 2: Purge Cloudflare cache
+1. Cloudflare Dashboard → `pagelyzer.io` zone → **Caching** → **Configuration**
+2. Click **Custom Purge** → enter `https://pagelyzer.io/sitemap.xml`
+3. Purge it
 
-## After implementation
-- Publish the site
-- Purge Cloudflare cache
-- Verify `https://pagelyzer.io/sitemap.xml` returns XML
+### Step 3: Test
+- Open `https://pagelyzer.io/sitemap.xml` in an incognito window
+- It should now 302-redirect to the Supabase edge function and show XML
+- If it still shows HTML, try **Purge Everything** in Cloudflare
+
+### Step 4: Re-submit to Google Search Console
+- Go to Google Search Console → Sitemaps
+- Re-submit `https://pagelyzer.io/sitemap.xml`
+
+## Why This Will Work
+- The redirect rule has correct syntax and is positioned before the SPA fallback
+- The Supabase edge function is confirmed working (tested earlier)
+- Once Cloudflare serves the fresh 302 response, Google will follow the redirect and receive valid XML
+
+## No code changes required
+This is a cache/deployment verification issue, not a code issue.
 
