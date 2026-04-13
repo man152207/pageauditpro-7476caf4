@@ -18,25 +18,22 @@ const SITEMAP_FALLBACK = `<?xml version="1.0" encoding="UTF-8"?>
 function generateSitemap(): Plugin {
   return {
     name: "generate-sitemap",
-    closeBundle: {
-      sequential: true,
-      async handler() {
-        try {
-          const res = await fetch(SITEMAP_EDGE_URL, {
-            headers: { Accept: "application/xml" },
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const xml = await res.text();
-          writeFileSync("dist/sitemap.xml", xml, "utf-8");
-          console.log("✅ sitemap.xml generated from edge function");
-        } catch (err: any) {
-          console.warn(
-            "⚠️  Edge function fetch failed, using fallback sitemap:",
-            err.message
-          );
-          writeFileSync("dist/sitemap.xml", SITEMAP_FALLBACK, "utf-8");
-        }
-      },
+    async buildStart() {
+      try {
+        const res = await fetch(SITEMAP_EDGE_URL, {
+          headers: { Accept: "application/xml" },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const xml = await res.text();
+        writeFileSync("public/sitemap.xml", xml, "utf-8");
+        console.log("✅ sitemap.xml written to public/ (will be copied to dist/)");
+      } catch (err: any) {
+        console.warn(
+          "⚠️  Edge function fetch failed, using fallback sitemap:",
+          err.message
+        );
+        writeFileSync("public/sitemap.xml", SITEMAP_FALLBACK, "utf-8");
+      }
     },
   };
 }
