@@ -143,27 +143,26 @@ export default function PricingPage() {
     <div>
       <SEOHead />
       {/* Hero */}
-      <section className="relative py-20 sm:py-28 hero-pattern-premium overflow-hidden">
-        <div className="floating-orb floating-orb-purple w-[300px] h-[300px] -top-20 -right-20" />
-        <div className="container relative text-center max-w-3xl mx-auto animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-6 border border-white/20">
-            <Crown className="h-4 w-4" />
+      <section className="relative py-14 sm:py-18 hero-pattern-premium overflow-hidden">
+        <div className="container relative text-center max-w-2xl mx-auto animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs font-semibold mb-5 border border-white/20">
+            <Crown className="h-3.5 w-3.5" />
             Pricing
           </div>
-          <h1 className="mb-5 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
+          <h1 className="mb-4 text-white">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-white/80 leading-relaxed">
+          <p className="text-base sm:text-lg text-white/80 leading-relaxed">
             Start free and upgrade when you need advanced insights and automation.
             No hidden fees, cancel anytime.
           </p>
         </div>
       </section>
 
-      <div className="container py-20 sm:py-24">
+      <div className="container py-12 sm:py-16">
 
         {/* Pricing Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {plans.map((plan, index) => {
             const isPopular = isPlanPopular(plan);
             const isPro = isPlanPro(plan);
@@ -174,43 +173,43 @@ export default function PricingPage() {
               <div
                 key={plan.id}
                 className={cn(
-                  'relative rounded-2xl border p-8 transition-all duration-300 animate-fade-in-up flex flex-col',
+                  'relative rounded-xl border p-6 transition-all duration-200 animate-fade-in-up flex flex-col',
                   `stagger-${Math.min(index + 1, 5)}`,
                   isPopular
-                    ? 'popular-card bg-gradient-to-b from-primary/5 to-transparent scale-[1.03] z-10'
-                    : 'border-border bg-card hover:border-primary/20 hover:shadow-xl hover:-translate-y-2'
+                    ? 'popular-card bg-gradient-to-b from-primary/5 to-transparent scale-[1.02] z-10'
+                    : 'border-border bg-card hover:border-primary/15 hover:shadow-md hover:-translate-y-1'
                 )}
               >
                 {isPopular && (
                   <div className="popular-badge">
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    <Sparkles className="h-3 w-3 mr-1" />
                     Most Popular
                   </div>
                 )}
 
-                <div className="mb-8 pt-3">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <h3 className="font-bold text-2xl">{plan.name}</h3>
+                <div className="mb-6 pt-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-xl">{plan.name}</h3>
                     {isPro && <ProBadge size="sm" />}
                   </div>
-                  <p className="text-base text-muted-foreground mb-6">
+                  <p className="text-sm text-muted-foreground mb-4">
                     {plan.description || `Get started with ${plan.name}`}
                   </p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-extrabold tracking-tight">
+                    <span className="text-4xl font-bold tracking-tight">
                       ${plan.price}
                     </span>
-                    <span className="text-lg text-muted-foreground">
+                    <span className="text-sm text-muted-foreground">
                       /{formatBillingType(plan.billing_type)}
                     </span>
                   </div>
                 </div>
 
-                <ul className="space-y-4 mb-10 flex-1">
+                <ul className="space-y-3 mb-6 flex-1">
                   {features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
-                      <span className="text-base text-muted-foreground">
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                      <span className="text-sm text-muted-foreground">
                         {feature}
                       </span>
                     </li>
@@ -219,21 +218,21 @@ export default function PricingPage() {
 
                 <Button
                   className={cn(
-                    'w-full text-base rounded-xl',
-                    isPopular && 'btn-premium shadow-lg'
+                    'w-full text-sm rounded-lg',
+                    isPopular && 'btn-premium shadow-sm'
                   )}
                   variant={plan.price === 0 ? 'default' : isPopular ? 'default' : 'outline'}
-                  size="lg"
+                  size="default"
                   onClick={() => handlePlanClick(plan)}
                 >
                   {plan.price === 0 ? (
                     <>
-                      <Zap className="mr-2 h-5 w-5" />
+                      <Zap className="mr-2 h-4 w-4" />
                       {cta}
                     </>
                   ) : (
                     <>
-                      <Crown className="mr-2 h-5 w-5" />
+                      <Crown className="mr-2 h-4 w-4" />
                       {cta}
                     </>
                   )}
@@ -244,10 +243,10 @@ export default function PricingPage() {
         </div>
 
         {/* Comparison Table */}
-        <div className="mt-24 sm:mt-28 max-w-4xl mx-auto animate-fade-in-up">
-          <h3 className="text-center text-3xl font-bold mb-12">Compare Plans</h3>
-          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-md">
-            <div className="grid grid-cols-3 gap-4 p-6 bg-muted/40 border-b border-border font-bold text-base">
+        <div className="mt-16 sm:mt-20 max-w-3xl mx-auto animate-fade-in-up">
+          <h3 className="text-center text-xl sm:text-2xl font-semibold mb-8">Compare Plans</h3>
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+            <div className="grid grid-cols-3 gap-3 p-4 bg-muted/40 border-b border-border font-semibold text-sm">
               <div>Feature</div>
               <div className="text-center">Free</div>
               <div className="text-center">Pro</div>
@@ -265,37 +264,37 @@ export default function PricingPage() {
               <div 
                 key={i} 
                 className={cn(
-                  'grid grid-cols-3 gap-4 p-6',
+                  'grid grid-cols-3 gap-3 p-4',
                   i % 2 === 0 ? 'bg-card' : 'bg-muted/20'
                 )}
               >
-                <div className="font-medium text-base">{row.feature}</div>
-                <div className="text-center text-muted-foreground text-base">{row.free}</div>
-                <div className="text-center text-primary font-semibold text-base">{row.pro}</div>
+                <div className="font-medium text-sm">{row.feature}</div>
+                <div className="text-center text-muted-foreground text-sm">{row.free}</div>
+                <div className="text-center text-primary font-medium text-sm">{row.pro}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* FAQ Link */}
-        <div className="text-center mt-16 sm:mt-20 p-12 rounded-2xl bg-primary/[0.04] border border-primary/10 max-w-2xl mx-auto animate-fade-in">
-          <p className="text-muted-foreground mb-6 text-lg">
+        <div className="text-center mt-12 p-6 sm:p-8 rounded-xl bg-primary/[0.03] border border-primary/8 max-w-lg mx-auto animate-fade-in">
+          <p className="text-muted-foreground mb-4 text-sm sm:text-base">
             Have questions? Check out our FAQ or contact support.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="outline" size="lg" asChild className="text-base rounded-xl">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button variant="outline" size="default" asChild className="text-sm rounded-lg">
               <Link to="/faq">
                 View FAQ
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="ghost" size="lg" asChild className="text-base">
+            <Button variant="ghost" size="default" asChild className="text-sm">
               <Link to="/contact">Contact Support</Link>
             </Button>
           </div>
         </div>
         {seoContent && (
-          <div className="mt-16 max-w-2xl mx-auto text-center">
+          <div className="mt-10 max-w-xl mx-auto text-center">
             <SeeMoreText text={seoContent} />
           </div>
         )}

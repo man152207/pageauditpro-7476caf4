@@ -112,88 +112,52 @@ export function MarketingLayout() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-muted/20">
-        <div className="container py-16 lg:py-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-16">
+        <div className="container py-10 lg:py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-10">
             <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center gap-2.5 font-bold text-lg mb-5 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform duration-200 group-hover:scale-105">
-                  <BarChart3 className="h-5 w-5" />
+              <Link to="/" className="flex items-center gap-2 font-semibold text-base mb-4 group">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform duration-200 group-hover:scale-105">
+                  <BarChart3 className="h-4 w-4" />
                 </div>
                 Pagelyzer
               </Link>
-              <p className="text-muted-foreground leading-relaxed text-base">
+              <p className="text-muted-foreground leading-relaxed text-sm">
                 Smart Facebook Page audit platform with AI-powered recommendations.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold text-base mb-5">Product</h4>
-              <ul className="space-y-3 text-muted-foreground">
-                <li>
-                  <Link to="/features" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/sample-report" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Sample Report
-                  </Link>
-                </li>
+              <h4 className="font-semibold text-sm mb-4">Product</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/features" className="hover:text-foreground transition-colors duration-200 text-sm">Features</Link></li>
+                <li><Link to="/pricing" className="hover:text-foreground transition-colors duration-200 text-sm">Pricing</Link></li>
+                <li><Link to="/sample-report" className="hover:text-foreground transition-colors duration-200 text-sm">Sample Report</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-base mb-5">Resources</h4>
-              <ul className="space-y-3 text-muted-foreground">
-                <li>
-                  <Link to="/faq" className="hover:text-foreground transition-colors duration-200 text-base">
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Blog
-                  </Link>
-                </li>
+              <h4 className="font-semibold text-sm mb-4">Resources</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/faq" className="hover:text-foreground transition-colors duration-200 text-sm">FAQ</Link></li>
+                <li><Link to="/contact" className="hover:text-foreground transition-colors duration-200 text-sm">Contact</Link></li>
+                <li><Link to="/blog" className="hover:text-foreground transition-colors duration-200 text-sm">Blog</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-base mb-5">Legal</h4>
-              <ul className="space-y-3 text-muted-foreground">
-                <li>
-                  <Link to="/privacy" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="hover:text-foreground transition-colors duration-200 text-base">
-                    Terms of Service
-                  </Link>
-                </li>
+              <h4 className="font-semibold text-sm mb-4">Legal</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/privacy" className="hover:text-foreground transition-colors duration-200 text-sm">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-foreground transition-colors duration-200 text-sm">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
             <p>© {new Date().getFullYear()} Pagelyzer. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-foreground transition-colors duration-200">
-                Twitter
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors duration-200">
-                LinkedIn
-              </a>
+            <div className="flex items-center gap-4">
+              <a href="#" className="hover:text-foreground transition-colors duration-200">Twitter</a>
+              <a href="#" className="hover:text-foreground transition-colors duration-200">LinkedIn</a>
             </div>
           </div>
         </div>
