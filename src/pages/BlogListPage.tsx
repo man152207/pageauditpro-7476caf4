@@ -6,6 +6,24 @@ import { SeeMoreText } from '@/components/ui/see-more-text';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, Calendar, Loader2, Tag } from 'lucide-react';
 
+/** Strip markdown symbols from text for clean display */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s?/g, '')        // headings
+    .replace(/(\*{1,3}|_{1,3})/g, '') // bold/italic
+    .replace(/~~(.*?)~~/g, '$1')      // strikethrough
+    .replace(/`{1,3}[^`]*`{1,3}/g, '')// code
+    .replace(/!\[.*?\]\(.*?\)/g, '')   // images
+    .replace(/\[([^\]]*)\]\(.*?\)/g, '$1') // links → text
+    .replace(/^[-*+]\s/gm, '')        // list markers
+    .replace(/^\d+\.\s/gm, '')        // numbered lists
+    .replace(/^>\s?/gm, '')           // blockquotes
+    .replace(/---+|===+|\*\*\*+/g, '') // horizontal rules
+    .replace(/\n{2,}/g, ' ')          // collapse newlines
+    .replace(/\s{2,}/g, ' ')          // collapse spaces
+    .trim();
+}
+
 interface BlogPost {
   id: string;
   slug: string;
@@ -100,7 +118,7 @@ export default function BlogListPage() {
                       </Link>
                     </h2>
                     {post.excerpt && (
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{stripMarkdown(post.excerpt)}</p>
                     )}
                     <div className="flex items-center justify-between">
                       <div className="flex gap-2 flex-wrap">
