@@ -93,97 +93,96 @@ export default function FeaturesPage() {
     <div>
       <SEOHead />
       {/* Hero */}
-      <section className="relative py-20 sm:py-28 overflow-hidden hero-pattern-premium">
-        <div className="floating-orb floating-orb-purple w-[400px] h-[400px] -top-32 -left-32" />
-        <div className="container relative text-center max-w-3xl mx-auto animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-6 border border-white/20">
-            <Sparkles className="h-4 w-4" />
+      <section className="relative py-14 sm:py-18 overflow-hidden hero-pattern-premium">
+        <div className="container relative text-center max-w-2xl mx-auto animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs font-semibold mb-5 border border-white/20">
+            <Sparkles className="h-3.5 w-3.5" />
             Features
           </div>
-          <h1 className="mb-5 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
+          <h1 className="mb-4 text-white">
             Powerful Features for Every Need
           </h1>
-          <p className="text-xl text-white/80 leading-relaxed">
+          <p className="text-base sm:text-lg text-white/80 leading-relaxed">
             From basic audits to advanced AI-powered insights, we have everything 
             you need to grow your Facebook presence.
           </p>
         </div>
       </section>
 
-      <div className="container py-20 sm:py-24">
+      <div className="container py-12 sm:py-16">
 
         {/* Free Features */}
-        <div className="mb-20 sm:mb-24">
-          <div className="flex items-center gap-4 mb-10">
-            <div className="h-14 w-14 rounded-xl bg-primary/8 flex items-center justify-center">
-              <Zap className="h-7 w-7 text-primary" />
+        <div className="mb-12 sm:mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-3xl">Free Features</h2>
-              <p className="text-muted-foreground text-lg">Get started without a credit card</p>
+              <h2 className="text-xl sm:text-2xl">Free Features</h2>
+              <p className="text-muted-foreground text-sm">Get started without a credit card</p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {freeFeatures.map((feature, index) => (
               <div
                 key={index}
                 className="group gradient-accent-card animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.08}s` }}
+                style={{ animationDelay: `${index * 0.06}s` }}
               >
-                <div className="h-14 w-14 rounded-xl bg-primary/8 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                  <feature.icon className="h-6 w-6 text-primary group-hover:text-white" />
+                <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all duration-200">
+                  <feature.icon className="h-5 w-5 text-primary group-hover:text-white" />
                 </div>
-                <h4 className="font-bold mb-3">{feature.title}</h4>
-                <p className="text-muted-foreground text-base">{feature.description}</p>
+                <h4 className="font-semibold text-base mb-2">{feature.title}</h4>
+                <p className="text-muted-foreground text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Pro Features */}
-        <div className="mb-20 sm:mb-24">
-          <div className="flex items-center gap-4 mb-10">
-            <div className="h-14 w-14 rounded-xl bg-primary/8 flex items-center justify-center">
-              <Crown className="h-7 w-7 text-primary" />
+        <div className="mb-12 sm:mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center">
+              <Crown className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-3xl">Pro Features</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl">Pro Features</h2>
               <ProBadge size="md" />
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {proFeatures.map((feature, index) => (
               <div
                 key={index}
                 className="group gradient-accent-card animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.06}s` }}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <div className="h-14 w-14 rounded-xl bg-primary/8 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                  <feature.icon className="h-6 w-6 text-primary group-hover:text-white" />
+                <div className="h-10 w-10 rounded-lg bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all duration-200">
+                  <feature.icon className="h-5 w-5 text-primary group-hover:text-white" />
                 </div>
-                <h4 className="font-bold mb-3">{feature.title}</h4>
-                <p className="text-muted-foreground text-base">{feature.description}</p>
+                <h4 className="font-semibold text-base mb-2">{feature.title}</h4>
+                <p className="text-muted-foreground text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-16 p-12 rounded-2xl bg-primary/[0.04] border border-primary/10">
-          <h3 className="mb-4">Ready to Get Started?</h3>
-          <p className="text-muted-foreground mb-8 text-lg">
+        <div className="text-center mt-10 p-8 rounded-xl bg-primary/[0.03] border border-primary/8">
+          <h3 className="mb-3 text-xl">Ready to Get Started?</h3>
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base">
             Try our free audit first, then upgrade when you need more.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" asChild className="text-base rounded-xl px-8">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button size="default" asChild className="text-sm rounded-lg px-6">
               <Link to="/dashboard/audit">
-                <Zap className="mr-2 h-5 w-5" />
+                <Zap className="mr-2 h-4 w-4" />
                 Run Free Audit
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-base rounded-xl px-8">
+            <Button size="default" variant="outline" asChild className="text-sm rounded-lg px-6">
               <Link to="/pricing">
                 View Pricing
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -192,7 +191,7 @@ export default function FeaturesPage() {
           </div>
         </div>
         {seoContent && (
-          <div className="mt-16 max-w-2xl mx-auto text-center">
+          <div className="mt-10 max-w-xl mx-auto text-center">
             <SeeMoreText text={seoContent} />
           </div>
         )}
