@@ -1,33 +1,23 @@
 
 
-# Problem: Changes Not Reaching GitHub
+# Add GitHub Actions Secrets to New Repository
 
-The latest sitemap fixes (changes to `vite.config.ts`, `package.json`, `scripts/verify-sitemap.mjs`) have **not been pushed to GitHub** yet. The last GitHub Action was Apr 12 ("Add Facebook link tooltips"), but all the sitemap work happened after that.
+## Problem
+The new repository `pageauditpro-7476caf4` has no secrets configured. The deploy workflow needs 3 FTP secrets to deploy to cPanel.
 
-**Why**: Lovable syncs to GitHub only when you click **Publish**. Until you publish, the code lives only inside Lovable's environment.
+## Required Secrets
 
-## Action Plan
+Add these 3 secrets in the new repo's **Settings → Secrets and variables → Actions → New repository secret**:
 
-### Step 1: Publish from Lovable
-Click the **Publish** button (top-right on desktop) → click **Update**. This will:
-1. Push all pending commits to GitHub (`main` branch)
-2. Trigger the `Deploy to cPanel` GitHub Action automatically
-3. The Action runs `npm run build` which now includes:
-   - `closeBundle` hook that writes `dist/sitemap.xml` (dynamic or fallback)
-   - `node scripts/verify-sitemap.mjs` post-build check
-4. FTP deploys the `dist/` folder (including `sitemap.xml`) to cPanel
+1. **FTP_SERVER** — Your cPanel FTP hostname (e.g. `pagelyzer.io` or `ftp.pagelyzer.io`)
+2. **FTP_USERNAME** — Your cPanel FTP username
+3. **FTP_PASSWORD** — Your cPanel FTP password
 
-### Step 2: Verify after deploy
-Once the Action completes (~1 min), I will fetch `https://pagelyzer.io/sitemap.xml` to confirm it returns valid XML.
+Copy these values from your old repo (`pageauditpro`) Settings → Secrets → Actions, or from your cPanel account.
 
-### Step 3: Fallback — Add build logging (if needed)
-If the Action fails, I will add a debug step in the GitHub Actions workflow to log whether `dist/sitemap.xml` exists before FTP upload:
-```yaml
-- name: Verify sitemap in dist
-  run: |
-    test -f dist/sitemap.xml && echo "✅ sitemap.xml found" || echo "❌ sitemap.xml MISSING"
-    head -5 dist/sitemap.xml || true
-```
+## After Adding Secrets
+No code changes needed. The workflow file is already correct in the new repo. Once secrets are added, the next push to `main` (or manual workflow trigger) will build and deploy to cPanel automatically.
 
-**You need to click Publish now** — that is the only missing step. All the code changes are already done and ready.
+## Note About Duplicate Workflow Files
+The workflow file appears twice in your message — the second version (with sitemap verification) is the correct one already in the repo.
 
