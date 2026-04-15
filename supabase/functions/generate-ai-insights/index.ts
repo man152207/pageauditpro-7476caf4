@@ -174,7 +174,7 @@ Format each insight with a clear title and 2-3 sentences of actionable advice. B
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
