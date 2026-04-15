@@ -20,14 +20,14 @@ export function MarketingLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/90 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-        <div className="container flex h-18 items-center justify-between py-3">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+        <div className="container flex h-16 sm:h-18 items-center justify-between py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 font-bold text-xl group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow">
-              <BarChart3 className="h-6 w-6" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all duration-200 group-hover:scale-105">
+              <BarChart3 className="h-5 w-5" />
             </div>
-            <span className="hidden sm:inline">Pagelyzer</span>
+            <span className="hidden sm:inline text-foreground">Pagelyzer</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -36,7 +36,7 @@ export function MarketingLayout() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="nav-link text-sm font-semibold py-1"
+                className="nav-link text-sm font-medium py-1"
               >
                 {link.label}
               </Link>
@@ -46,7 +46,7 @@ export function MarketingLayout() {
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
             {user ? (
-              <Button asChild>
+              <Button asChild className="rounded-xl">
                 <Link to="/dashboard">
                   Dashboard
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -54,10 +54,10 @@ export function MarketingLayout() {
               </Button>
             ) : (
               <>
-                <Button variant="ghost" asChild className="hidden sm:inline-flex font-semibold">
+                <Button variant="ghost" asChild className="hidden sm:inline-flex font-medium">
                   <Link to="/auth">Login</Link>
                 </Button>
-                <Button variant="success" asChild className="shadow-md">
+                <Button asChild className="shadow-sm rounded-xl">
                   <Link to="/auth?mode=signup">
                     <Zap className="mr-2 h-4 w-4" />
                     Start Free
@@ -92,7 +92,7 @@ export function MarketingLayout() {
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  'text-sm font-semibold text-muted-foreground hover:text-foreground py-3 px-4 rounded-xl hover:bg-muted transition-all duration-200',
+                  'text-sm font-medium text-muted-foreground hover:text-foreground py-3 px-4 rounded-xl hover:bg-muted transition-all duration-200',
                   'animate-fade-in',
                   `stagger-${index + 1}`
                 )}
@@ -111,9 +111,9 @@ export function MarketingLayout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-muted/30">
-        <div className="container py-14 lg:py-18">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 lg:gap-14">
+      <footer className="border-t border-border bg-muted/20">
+        <div className="container py-16 lg:py-20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-16">
             <div className="col-span-2 md:col-span-1">
               <Link to="/" className="flex items-center gap-2.5 font-bold text-lg mb-5 group">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform duration-200 group-hover:scale-105">
@@ -121,26 +121,26 @@ export function MarketingLayout() {
                 </div>
                 Pagelyzer
               </Link>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 Smart Facebook Page audit platform with AI-powered recommendations.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold mb-5">Product</h4>
+              <h4 className="font-bold text-base mb-5">Product</h4>
               <ul className="space-y-3 text-muted-foreground">
                 <li>
-                  <Link to="/features" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/features" className="hover:text-foreground transition-colors duration-200 text-base">
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link to="/pricing" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/pricing" className="hover:text-foreground transition-colors duration-200 text-base">
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link to="/sample-report" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/sample-report" className="hover:text-foreground transition-colors duration-200 text-base">
                     Sample Report
                   </Link>
                 </li>
@@ -148,36 +148,36 @@ export function MarketingLayout() {
             </div>
 
             <div>
-              <h4 className="font-bold mb-5">Resources</h4>
+              <h4 className="font-bold text-base mb-5">Resources</h4>
               <ul className="space-y-3 text-muted-foreground">
                 <li>
-                  <Link to="/faq" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/faq" className="hover:text-foreground transition-colors duration-200 text-base">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/contact" className="hover:text-foreground transition-colors duration-200 text-base">
                     Contact
                   </Link>
                 </li>
                 <li>
-                  <Link to="/support" className="hover:text-foreground transition-colors duration-200">
-                    Support
+                  <Link to="/blog" className="hover:text-foreground transition-colors duration-200 text-base">
+                    Blog
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold mb-5">Legal</h4>
+              <h4 className="font-bold text-base mb-5">Legal</h4>
               <ul className="space-y-3 text-muted-foreground">
                 <li>
-                  <Link to="/privacy" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/privacy" className="hover:text-foreground transition-colors duration-200 text-base">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="hover:text-foreground transition-colors duration-200">
+                  <Link to="/terms" className="hover:text-foreground transition-colors duration-200 text-base">
                     Terms of Service
                   </Link>
                 </li>
@@ -185,7 +185,7 @@ export function MarketingLayout() {
             </div>
           </div>
 
-          <div className="mt-14 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
             <p>© {new Date().getFullYear()} Pagelyzer. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <a href="#" className="hover:text-foreground transition-colors duration-200">

@@ -163,49 +163,47 @@ export default function HomePage() {
     { feature: 'History & Comparisons', free: false, pro: true },
   ];
 
-
   const { seoContent } = usePageSeoContent('/');
 
   return (
     <div className="flex flex-col overflow-hidden">
       <SEOHead />
-      {/* ========== YOAST-STYLE HERO ========== */}
-      <section className="relative py-20 sm:py-28 md:py-36 hero-pattern-premium overflow-hidden">
-        {/* Floating orbs */}
-        <div className="floating-orb floating-orb-purple w-[600px] h-[600px] -top-48 -left-48" />
-        <div className="floating-orb floating-orb-green w-[500px] h-[500px] -bottom-40 -right-40" style={{ animationDelay: '4s' }} />
-        <div className="floating-orb floating-orb-purple w-[350px] h-[350px] top-1/3 right-1/4 opacity-15" style={{ animationDelay: '2s' }} />
+
+      {/* ========== HERO ========== */}
+      <section className="relative py-24 sm:py-32 md:py-40 overflow-hidden bg-background">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-accent/[0.03] blur-3xl translate-y-1/2 -translate-x-1/4" />
 
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-8 animate-fade-in border border-white/20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-8 animate-fade-in border border-primary/15">
               <Facebook className="h-4 w-4" />
-              <span>#1 Facebook Page Audit Tool</span>
+              <span>#1 Facebook Page Audit Platform</span>
             </div>
 
             {/* Headline */}
-            <h1 className="mb-6 text-white animate-fade-in-up text-balance" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
-              Boost Your Page with{' '}
-              <span className="relative">
-                <span className="relative z-10 text-accent">AI-Powered Insights</span>
-              </span>
+            <h1 className="mb-8 animate-fade-in-up text-balance">
+              Understand Your Facebook Page{' '}
+              <span className="gradient-text">Performance</span>
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl sm:text-2xl text-white/90 mb-10 max-w-2xl mx-auto animate-fade-in-up stagger-1 text-pretty leading-relaxed" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.2)' }}>
-              Get instant health scores, engagement analysis, and personalized action plans to grow your Facebook presence.
+            <p className="text-xl sm:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto animate-fade-in-up stagger-1 text-pretty leading-relaxed">
+              Get instant health scores, AI-powered recommendations, and actionable insights to grow your Facebook presence.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up stagger-2">
-              <Button size="xl" variant="success" asChild className="shadow-2xl hover:shadow-[0_8px_30px_-6px_hsl(86_66%_43%/0.6)] transition-shadow">
+              <Button size="xl" asChild className="shadow-lg hover:shadow-xl transition-shadow text-base px-8 py-6 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/dashboard/audit">
                   <Zap className="mr-2 h-5 w-5" />
                   Start Free Audit
                 </Link>
               </Button>
-              <Button size="xl" variant="outline" asChild className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 shadow-lg">
+              <Button size="xl" variant="outline" asChild className="border-2 border-border text-foreground hover:bg-muted/50 text-base px-8 py-6 rounded-xl">
                 <Link to="/sample-report">
                   <Play className="mr-2 h-5 w-5" />
                   View Sample Report
@@ -213,62 +211,78 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {/* Trust signals - enhanced strip */}
-            <div className="mt-14 trust-strip max-w-xl mx-auto animate-fade-in stagger-3">
-              <div className="trust-strip-item">
+            {/* Trust signals */}
+            <div className="mt-16 flex flex-wrap items-center justify-center gap-8 sm:gap-12 animate-fade-in stagger-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400 drop-shadow-sm" />
+                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <span>4.8/5</span>
+                <span className="text-sm font-medium">4.8/5 rating</span>
               </div>
-              <div className="h-5 w-px bg-white/30 hidden sm:block" />
-              <div className="trust-strip-item">
-                <Shield className="h-5 w-5 text-accent" />
-                <span>GDPR Compliant</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">GDPR Compliant</span>
               </div>
-              <div className="h-5 w-px bg-white/30 hidden sm:block" />
-              <div className="trust-strip-item">
-                <Users className="h-5 w-5 text-accent" />
-                <span>10K+ Audits</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">10K+ Audits Run</span>
               </div>
             </div>
           </div>
 
-          {/* Floating Mockup Preview */}
-          <div className="max-w-md mx-auto mt-16 animate-fade-in-up stagger-4 hidden sm:block">
-            <div className="mockup-card">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="mockup-score-ring">
-                  <svg width="80" height="80" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(86 70% 50%)" strokeWidth="6" strokeLinecap="round"
-                      strokeDasharray={`${(85/100) * 2 * Math.PI * 34} ${2 * Math.PI * 34}`} />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-extrabold">85</span>
-                  </div>
+          {/* Dashboard Preview Mockup */}
+          <div className="max-w-3xl mx-auto mt-20 animate-fade-in-up stagger-4">
+            <div className="relative rounded-2xl border border-border bg-card p-1 shadow-2xl">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400/60" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-400/60" />
                 </div>
-                <div>
-                  <div className="text-lg font-bold">Page Health Score</div>
-                  <div className="text-sm text-white/70">Your page is performing well</div>
+                <div className="flex-1 flex justify-center">
+                  <div className="px-4 py-1 rounded-md bg-muted text-xs text-muted-foreground font-mono">pagelyzer.io/dashboard</div>
                 </div>
               </div>
-              <div className="space-y-2.5">
-                {[
-                  { label: 'Engagement', score: 78, color: 'hsl(86 70% 50%)' },
-                  { label: 'Consistency', score: 90, color: 'hsl(86 70% 50%)' },
-                  { label: 'Growth', score: 65, color: 'hsl(38 92% 50%)' },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <span className="text-xs text-white/70 w-24">{item.label}</span>
-                    <div className="flex-1 h-2 rounded-full bg-white/15 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${item.score}%`, backgroundColor: item.color }} />
+              {/* Mock dashboard content */}
+              <div className="p-6 sm:p-8 space-y-6">
+                {/* Score row */}
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
+                        strokeDasharray={`${(85/100) * 2 * Math.PI * 42} ${2 * Math.PI * 42}`}
+                        style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }} />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-3xl font-extrabold text-foreground">85</span>
                     </div>
-                    <span className="text-xs font-bold w-8 text-right">{item.score}</span>
                   </div>
-                ))}
+                  <div>
+                    <div className="text-xl font-bold text-foreground">Page Health Score</div>
+                    <div className="text-base text-muted-foreground">Your page is performing well</div>
+                  </div>
+                </div>
+                {/* Metric bars */}
+                <div className="space-y-3">
+                  {[
+                    { label: 'Engagement', score: 78, color: 'bg-primary' },
+                    { label: 'Consistency', score: 92, color: 'bg-success' },
+                    { label: 'Growth', score: 65, color: 'bg-warning' },
+                    { label: 'Content Quality', score: 88, color: 'bg-primary' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground w-32 font-medium">{item.label}</span>
+                      <div className="flex-1 h-2.5 rounded-full bg-muted overflow-hidden">
+                        <div className={`h-full rounded-full ${item.color} transition-all duration-1000`} style={{ width: `${item.score}%` }} />
+                      </div>
+                      <span className="text-sm font-bold text-foreground w-10 text-right">{item.score}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -276,10 +290,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== BENEFITS ========== */}
-      <section className="section bg-background">
+      <section className="section bg-muted/30">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <Sparkles className="h-4 w-4" />
               Why Pagelyzer
             </div>
@@ -294,8 +308,8 @@ export default function HomePage() {
                 className="group gradient-accent-card animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
-                  <benefit.icon className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-xl bg-primary/8 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
+                  <benefit.icon className="h-6 w-6 text-primary group-hover:text-white" />
                 </div>
                 <h4 className="mb-3">{benefit.title}</h4>
                 <p className="text-muted-foreground text-base leading-relaxed">{benefit.description}</p>
@@ -306,10 +320,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== HOW IT WORKS ========== */}
-      <section className="section hero-pattern-soft">
+      <section className="section bg-background">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <Target className="h-4 w-4" />
               Simple Process
             </div>
@@ -318,22 +332,22 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-10 md:gap-6 relative">
+            <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative">
               {/* Connection lines */}
-              <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-1">
-                <div className="w-full h-full bg-gradient-to-r from-primary via-primary/50 to-accent rounded-full" />
+              <div className="hidden md:block absolute top-20 left-[22%] right-[22%] h-0.5">
+                <div className="w-full h-full bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 rounded-full" />
               </div>
 
               {howItWorks.map((step, index) => (
                 <div key={index} className="relative text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.15}s` }}>
-                  <div className="relative z-10 mx-auto mb-6 w-32 h-32 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center border border-primary/20 shadow-lg">
+                  <div className="relative z-10 mx-auto mb-8 w-40 h-40 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
                     <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg shadow-md">
                       {step.step}
                     </div>
-                    <step.icon className="h-12 w-12 text-primary" />
+                    <step.icon className="h-14 w-14 text-primary" />
                   </div>
-                  <h4 className="mb-2">{step.title}</h4>
-                  <p className="text-muted-foreground">{step.description}</p>
+                  <h4 className="mb-3">{step.title}</h4>
+                  <p className="text-muted-foreground text-lg">{step.description}</p>
                 </div>
               ))}
             </div>
@@ -341,17 +355,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========== WHY PAGELYZER BEATS BUSINESS SUITE (A1) ========== */}
+      {/* ========== WHY PAGELYZER BEATS BUSINESS SUITE ========== */}
       <WhyPagelyzerSection />
 
-      {/* ========== WHAT YOU GET IN EVERY AUDIT (A2) ========== */}
+      {/* ========== WHAT YOU GET IN EVERY AUDIT ========== */}
       <WhatYouGetSection />
 
       {/* ========== WHAT WE ANALYZE ========== */}
-      <section className="section-tight bg-muted/50">
+      <section className="section bg-muted/30">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <BarChart3 className="h-4 w-4" />
               Comprehensive Analysis
             </div>
@@ -359,17 +373,17 @@ export default function HomePage() {
             <p>Deep dive into every aspect of your Facebook page performance.</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 sm:gap-6">
             {metrics.map((metric, index) => (
               <div
                 key={index}
-                className="group interactive-card p-6 text-center animate-fade-in-up"
+                className="group interactive-card p-6 sm:p-8 text-center animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <div className="feature-icon-primary mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <metric.icon className="h-5 w-5" />
+                <div className="h-14 w-14 rounded-xl bg-primary/8 text-primary flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                  <metric.icon className="h-6 w-6" />
                 </div>
-                <div className="font-semibold text-sm">{metric.label}</div>
+                <div className="font-semibold text-base">{metric.label}</div>
               </div>
             ))}
           </div>
@@ -377,10 +391,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== RECOMMENDATIONS PREVIEW ========== */}
-      <section className="section">
+      <section className="section bg-background">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <Lightbulb className="h-4 w-4" />
               Actionable Insights
             </div>
@@ -396,13 +410,11 @@ export default function HomePage() {
                 style={{ animationDelay: `${index * 0.08}s` }}
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <h4 className="font-semibold text-sm leading-snug">{rec.title}</h4>
+                  <h4 className="font-semibold text-base leading-snug">{rec.title}</h4>
                   <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 </div>
                 <div className="flex gap-2">
-                  <span className={cn(
-                    'badge-impact-' + rec.impact.toLowerCase()
-                  )}>
+                  <span className={cn('badge-impact-' + rec.impact.toLowerCase())}>
                     {rec.impact} Impact
                   </span>
                   <span className="badge-effort-easy">
@@ -413,8 +425,8 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="text-center mt-10">
-            <Button size="lg" variant="outline" asChild className="h-12 px-8">
+          <div className="text-center mt-12">
+            <Button size="lg" variant="outline" asChild className="h-13 px-8 text-base rounded-xl">
               <Link to="/sample-report">
                 See Full Sample Report
                 <ChevronRight className="ml-2 h-4 w-4" />
@@ -425,10 +437,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== USE CASES ========== */}
-      <section className="section-tight bg-muted/50">
+      <section className="section bg-muted/30">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <Users className="h-4 w-4" />
               Built For You
             </div>
@@ -436,22 +448,22 @@ export default function HomePage() {
             <p>Trusted by agencies, brands, and creators worldwide.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {useCases.map((useCase, index) => (
               <div
                 key={index}
-                className="premium-card p-7 animate-fade-in-up"
+                className="premium-card animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="feature-icon-primary mb-6">
-                  <useCase.icon className="h-6 w-6" />
+                <div className="h-14 w-14 rounded-xl bg-primary/8 text-primary flex items-center justify-center mb-6">
+                  <useCase.icon className="h-7 w-7" />
                 </div>
                 <h4 className="mb-3">{useCase.title}</h4>
-                <p className="text-muted-foreground mb-5">{useCase.description}</p>
-                <ul className="space-y-2.5">
+                <p className="text-muted-foreground mb-6 text-base">{useCase.description}</p>
+                <ul className="space-y-3">
                   {useCase.outcomes.map((outcome, i) => (
-                    <li key={i} className="flex items-center gap-2.5 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                    <li key={i} className="flex items-center gap-3 text-base">
+                      <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
                       <span>{outcome}</span>
                     </li>
                   ))}
@@ -463,28 +475,28 @@ export default function HomePage() {
       </section>
 
       {/* ========== SECURITY ========== */}
-      <section className="section">
+      <section className="section bg-background">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-6">
                 <Shield className="h-4 w-4" />
                 Security First
               </div>
-              <h2 className="mb-4">Your Data is Safe With Us</h2>
-              <p className="text-muted-foreground mb-8 text-lg">
+              <h2 className="mb-5">Your Data is Safe With Us</h2>
+              <p className="text-muted-foreground mb-10 text-lg leading-relaxed">
                 We take security seriously. Your data is encrypted, never shared, and you can delete it anytime.
               </p>
               
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {securityFeatures.map((feature, index) => (
-                  <div key={index} className="flex gap-4 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <div className="feature-icon-accent shrink-0">
+                  <div key={index} className="flex gap-5 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div className="h-12 w-12 rounded-xl bg-primary/8 text-primary flex items-center justify-center shrink-0">
                       <feature.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-base mb-1">{feature.title}</h4>
-                      <p className="text-muted-foreground">{feature.description}</p>
+                      <h4 className="font-semibold text-lg mb-1">{feature.title}</h4>
+                      <p className="text-muted-foreground text-base">{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -492,11 +504,11 @@ export default function HomePage() {
             </div>
             
             <div className="relative hidden lg:flex items-center justify-center">
-              <div className="aspect-square w-80 rounded-[2rem] bg-gradient-to-br from-primary/8 to-accent/8 p-10 flex items-center justify-center vector-dots border border-border/50">
+              <div className="aspect-square w-80 rounded-3xl bg-primary/[0.04] p-10 flex items-center justify-center border border-primary/10">
                 <Shield className="h-32 w-32 text-primary/15" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-44 w-44 rounded-full border-4 border-primary/15 animate-pulse-slow" />
+                <div className="h-44 w-44 rounded-full border-2 border-primary/10 animate-pulse-slow" />
               </div>
             </div>
           </div>
@@ -504,10 +516,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== FREE VS PRO ========== */}
-      <section className="section-tight bg-muted/50">
+      <section className="section bg-muted/30">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <Crown className="h-4 w-4" />
               Simple Pricing
             </div>
@@ -516,34 +528,34 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <div className="rounded-3xl border border-border overflow-hidden bg-card shadow-xl">
-              <div className="grid grid-cols-3 bg-muted/70">
-                <div className="p-5 sm:p-6 font-bold">Feature</div>
-                <div className="p-5 sm:p-6 text-center font-bold">Free</div>
-                <div className="p-5 sm:p-6 text-center font-bold flex items-center justify-center gap-2">
+            <div className="rounded-2xl border border-border overflow-hidden bg-card shadow-lg">
+              <div className="grid grid-cols-3 bg-muted/50">
+                <div className="p-5 sm:p-6 font-bold text-base">Feature</div>
+                <div className="p-5 sm:p-6 text-center font-bold text-base">Free</div>
+                <div className="p-5 sm:p-6 text-center font-bold text-base flex items-center justify-center gap-2">
                   <ProBadge /> Pro
                 </div>
               </div>
 
               {comparisonData.map((row, index) => (
-                <div key={index} className="grid grid-cols-3 border-t border-border hover:bg-muted/30 transition-colors">
-                  <div className="p-5 sm:p-6 text-sm font-medium">{row.feature}</div>
+                <div key={index} className="grid grid-cols-3 border-t border-border hover:bg-muted/20 transition-colors">
+                  <div className="p-5 sm:p-6 text-base font-medium">{row.feature}</div>
                   <div className="p-5 sm:p-6 text-center">
                     {row.free ? (
-                      <CheckCircle2 className="h-5 w-5 text-accent mx-auto" />
+                      <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
                     ) : (
                       <span className="text-muted-foreground/40">—</span>
                     )}
                   </div>
                   <div className="p-5 sm:p-6 text-center">
-                    <CheckCircle2 className="h-5 w-5 text-accent mx-auto" />
+                    <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-10 text-center">
-              <Button size="lg" asChild className="h-12 px-10">
+            <div className="mt-12 text-center">
+              <Button size="lg" asChild className="h-13 px-10 text-base rounded-xl">
                 <Link to="/pricing">
                   View Full Pricing
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -555,10 +567,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== FAQ ========== */}
-      <section className="section">
+      <section className="section bg-background">
         <div className="container">
           <div className="section-header">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
               <MessageSquare className="h-4 w-4" />
               FAQ
             </div>
@@ -566,15 +578,15 @@ export default function HomePage() {
             <p>Got questions? We've got answers.</p>
           </div>
 
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="space-y-3">
               {faqs.map((faq, index) => (
                 <AccordionItem
                   key={index}
                   value={`faq-${index}`}
-                  className="border border-border rounded-2xl px-6 bg-card data-[state=open]:shadow-lg transition-all duration-300"
+                  className="border border-border rounded-xl px-6 bg-card data-[state=open]:shadow-md transition-all duration-300"
                 >
-                  <AccordionTrigger className="text-left font-bold py-5 hover:no-underline text-base">
+                  <AccordionTrigger className="text-left font-bold py-5 hover:no-underline text-lg">
                     {faq.q}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-5 text-base leading-relaxed">
@@ -584,13 +596,13 @@ export default function HomePage() {
               ))}
             </Accordion>
 
-            <div className="mt-10 p-8 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
-              <p className="text-muted-foreground mb-5 text-lg">Still have questions?</p>
+            <div className="mt-12 p-10 rounded-2xl bg-primary/[0.04] border border-primary/10 text-center">
+              <p className="text-muted-foreground mb-6 text-lg">Still have questions?</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button variant="outline" size="lg" asChild>
+                <Button variant="outline" size="lg" asChild className="text-base rounded-xl">
                   <Link to="/contact">Contact Support</Link>
                 </Button>
-                <Button size="lg" asChild>
+                <Button size="lg" asChild className="text-base rounded-xl">
                   <Link to="/dashboard/audit">Try Free Audit</Link>
                 </Button>
               </div>
@@ -599,34 +611,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========== CTA HOOKS (A3) ========== */}
-      <section className="section-tight bg-background">
+      {/* ========== CTA HOOKS ========== */}
+      <section className="section bg-muted/30">
         <div className="container">
           <div className="section-header">
-            <h2 className="text-2xl sm:text-3xl">What Makes Pagelyzer Different?</h2>
+            <h2>What Makes Pagelyzer Different?</h2>
           </div>
           <CTAHooksSection />
         </div>
       </section>
 
       {/* ========== FINAL CTA ========== */}
-      <section className="py-24 sm:py-32 relative overflow-hidden hero-pattern-premium">
-        <div className="floating-orb floating-orb-purple w-[400px] h-[400px] -top-32 -left-32 opacity-30" />
-        <div className="floating-orb floating-orb-green w-[300px] h-[300px] -bottom-20 -right-20 opacity-30" style={{ animationDelay: '3s' }} />
+      <section className="py-28 sm:py-36 relative overflow-hidden hero-pattern-premium">
+        <div className="floating-orb floating-orb-purple w-[400px] h-[400px] -top-32 -left-32" />
+        <div className="floating-orb floating-orb-green w-[300px] h-[300px] -bottom-20 -right-20" style={{ animationDelay: '3s' }} />
         
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center h-20 w-20 rounded-3xl bg-white/10 backdrop-blur-sm mb-8">
+            <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-sm mb-10">
               <Zap className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-5 text-white">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
               Ready to Grow Your Page?
             </h2>
-            <p className="text-white/85 mb-10 text-xl max-w-lg mx-auto">
+            <p className="text-white/80 mb-12 text-xl max-w-lg mx-auto leading-relaxed">
               Join thousands of marketers who use Pagelyzer to boost their Facebook presence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="xl" variant="success" asChild className="shadow-2xl">
+              <Button size="xl" asChild className="shadow-2xl bg-white text-primary hover:bg-white/90 text-base px-8 py-6 rounded-xl font-bold">
                 <Link to="/dashboard/audit">
                   <Zap className="mr-2 h-5 w-5" />
                   Start Free Audit
@@ -635,7 +647,7 @@ export default function HomePage() {
               <Button
                 size="xl"
                 asChild
-                className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 hover:bg-white/20"
+                className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/25 hover:bg-white/20 text-base px-8 py-6 rounded-xl"
               >
                 <Link to="/features">
                   Learn More
@@ -649,7 +661,7 @@ export default function HomePage() {
 
       {/* SEO Content */}
       {seoContent && (
-        <section className="section-tight bg-muted/30">
+        <section className="section-tight bg-muted/20">
           <div className="container max-w-3xl text-center">
             <SeeMoreText text={seoContent} />
           </div>
