@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Loader2, Plus, Save, Trash2, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { BlogImageUpload } from '@/components/blog/BlogImageUpload';
 
 interface BlogPost {
   id: string;
@@ -161,10 +162,10 @@ export default function BlogManagementPage() {
               value={editingPost.content || ''} onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Cover Image URL</label>
-              <Input value={editingPost.cover_image || ''} onChange={(e) => setEditingPost({ ...editingPost, cover_image: e.target.value })} />
-            </div>
+            <BlogImageUpload
+              value={editingPost.cover_image || null}
+              onChange={(url) => setEditingPost({ ...editingPost, cover_image: url })}
+            />
             <div>
               <label className="text-xs font-medium text-muted-foreground">Author</label>
               <Input value={editingPost.author || ''} onChange={(e) => setEditingPost({ ...editingPost, author: e.target.value })} />

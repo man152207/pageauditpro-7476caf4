@@ -127,7 +127,7 @@ export default function BlogPostPage() {
         )}
 
         {/* Full blog content - no truncation */}
-        <article className="prose prose-neutral dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-li:text-muted-foreground">
+        <article className="blog-prose prose prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown>{post.content}</ReactMarkdown>
         </article>
       </div>

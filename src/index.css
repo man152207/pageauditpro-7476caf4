@@ -1388,3 +1388,24 @@
   0%, 100% { box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.25); }
   50% { box-shadow: 0 0 40px -5px hsl(var(--primary) / 0.4); }
 }
+
+/* =====================================================
+   BLOG PROSE TYPOGRAPHY
+   ===================================================== */
+.blog-prose {
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.8;
+}
+.blog-prose h1 { font-size: 2rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; color: hsl(var(--foreground)); }
+.blog-prose h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; color: hsl(var(--foreground)); }
+.blog-prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.5rem; color: hsl(var(--foreground)); }
+.blog-prose p { font-size: 1.0625rem; line-height: 1.8; margin-bottom: 1.25rem; color: hsl(var(--muted-foreground)); }
+.blog-prose a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 2px; }
+.blog-prose strong { color: hsl(var(--foreground)); font-weight: 600; }
+.blog-prose ul, .blog-prose ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+.blog-prose li { font-size: 1.0625rem; line-height: 1.8; color: hsl(var(--muted-foreground)); margin-bottom: 0.5rem; }
+.blog-prose hr { border-color: hsl(var(--border)); margin: 2rem 0; }
+.blog-prose blockquote { border-left: 4px solid hsl(var(--primary)); padding-left: 1.25rem; font-style: italic; color: hsl(var(--muted-foreground)); margin: 1.5rem 0; }
+.blog-prose img { border-radius: 0.75rem; margin: 1.5rem 0; }
+.blog-prose code { background: hsl(var(--muted)); padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
+.blog-prose pre { background: hsl(var(--muted)); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1.5rem 0; }
