@@ -1,32 +1,69 @@
 
+## Why this build failed
 
-# Fix CI Build Failures
+I checked the current codebase, and the files are already fixed here:
 
-Two issues causing the GitHub Actions deployments to fail:
+- `package.json` now has:
+  ```json
+  "build": "vite build"
+  ```
+- `src/index.css` already starts with the Google Fonts `@import`
+- `.github/workflows/deploy-ftp.yml` only verifies `dist/` and `dist/.htaccess`
 
-## Issue 1: Sitemap verification script still in build
-**File**: `package.json` line 8
-The build command still runs `node scripts/verify-sitemap.mjs`, which checks for `dist/sitemap.xml`. Since we switched to real-time sitemap via `.htaccess` proxy, this file no longer exists.
+So the GitHub Actions log you shared is not using this updated state. It is running an older commit/version where:
 
-**Fix**: Change the build script from:
+- `package.json` still had:
+  ```json
+  "build": "vite build && node scripts/verify-sitemap.mjs"
+  ```
+- `src/index.css` still had the font `@import` below Tailwind directives
+
+## What the log means
+
+1. **Actual failure**
+   - `❌ dist/sitemap.xml is missing!`
+   - This is the real reason the job exited with code 1.
+   - The old sitemap verification script is still being executed in that GitHub build.
+
+2. **Secondary warning**
+   - `[vite:css] @import must precede all other statements`
+   - This comes from the old CSS order.
+   - Vite still completed the build, so this is not what stopped deployment.
+
+3. **Unrelated warning**
+   - `Node.js 20 actions are deprecated`
+   - This is only a future compatibility warning, not today’s failure.
+
+## Root cause
+
+Most likely one of these is true:
+
+- the CI-fix commit was not actually pushed to GitHub `main`
+- the failing workflow run belongs to an earlier commit before the fix
+- GitHub is building a branch/commit that still contains the old files
+
+## Fix plan
+
+1. Verify the GitHub repo’s `main` branch contains these exact changes:
+   - `package.json` → `"build": "vite build"`
+   - `src/index.css` → `@import` moved to the first line
+   - `scripts/verify-sitemap.mjs` removed
+   - `scripts/generate-sitemap.mjs` removed
+
+2. Push/sync those files if GitHub still shows the old versions.
+
+3. Re-run the workflow after that commit is on `main`.
+
+4. Optional cleanup after deploy is green:
+   - update workflow actions later for Node 24 support to remove the deprecation warning
+
+## Technical note
+
+Because the log still shows:
+```bash
+> vite build && node scripts/verify-sitemap.mjs
 ```
-"build": "vite build && node scripts/verify-sitemap.mjs"
+the checked-out GitHub commit definitely still had the old `package.json`. If GitHub had the latest fixed file, that line would simply be:
+```bash
+> vite build
 ```
-to:
-```
-"build": "vite build"
-```
-
-Also delete the now-unused scripts:
-- `scripts/verify-sitemap.mjs`
-- `scripts/generate-sitemap.mjs`
-
-## Issue 2: CSS @import order violation
-**File**: `src/index.css` line 11
-The `@import url('https://fonts.googleapis.com/css2?...')` statement comes after `@tailwind` directives. CSS spec requires `@import` to precede all other statements.
-
-**Fix**: Move the `@import` to line 1, before `@tailwind base`.
-
-## Result
-Both CI errors will be resolved. The build will succeed and deploy to cPanel.
-
