@@ -21,7 +21,6 @@ interface DbPlan {
   sort_order: number;
 }
 
-// Feature descriptions for each plan (used for display)
 const planFeatures: Record<string, string[]> = {
   Free: [
     '3 manual audits per month',
@@ -118,12 +117,10 @@ export default function PricingPage() {
     }
 
     if (!user) {
-      // Store intended plan, redirect to login then billing
       navigate(`/auth?mode=signup&redirect=/dashboard/billing&plan=${plan.id}`);
       return;
     }
 
-    // Logged in users go to billing with plan pre-selected
     navigate(`/dashboard/billing?plan=${plan.id}`);
   };
 
@@ -145,25 +142,25 @@ export default function PricingPage() {
   return (
     <div>
       <SEOHead />
-      {/* Gradient Hero Banner */}
-      <section className="relative py-14 sm:py-18 hero-pattern-mini overflow-hidden">
-        <div className="floating-orb floating-orb-purple w-[300px] h-[300px] -top-20 -right-20 opacity-20" />
+      {/* Hero */}
+      <section className="relative py-20 sm:py-28 hero-pattern-premium overflow-hidden">
+        <div className="floating-orb floating-orb-purple w-[300px] h-[300px] -top-20 -right-20" />
         <div className="container relative text-center max-w-3xl mx-auto animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-5 border border-white/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-semibold mb-6 border border-white/20">
             <Crown className="h-4 w-4" />
             Pricing
           </div>
-          <h1 className="mb-4 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
+          <h1 className="mb-5 text-white" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
             Simple, Transparent Pricing
           </h1>
-          <p className="text-lg text-white/85">
+          <p className="text-xl text-white/80 leading-relaxed">
             Start free and upgrade when you need advanced insights and automation.
             No hidden fees, cancel anytime.
           </p>
         </div>
       </section>
 
-      <div className="container py-16 sm:py-20">
+      <div className="container py-20 sm:py-24">
 
         {/* Pricing Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -177,11 +174,11 @@ export default function PricingPage() {
               <div
                 key={plan.id}
                 className={cn(
-                  'relative rounded-3xl border p-7 transition-all duration-300 animate-fade-in-up flex flex-col',
+                  'relative rounded-2xl border p-8 transition-all duration-300 animate-fade-in-up flex flex-col',
                   `stagger-${Math.min(index + 1, 5)}`,
                   isPopular
-                    ? 'popular-card bg-gradient-to-b from-primary/8 to-transparent scale-[1.03] z-10'
-                    : 'border-border bg-card hover:border-primary/30 hover:shadow-xl hover:-translate-y-2'
+                    ? 'popular-card bg-gradient-to-b from-primary/5 to-transparent scale-[1.03] z-10'
+                    : 'border-border bg-card hover:border-primary/20 hover:shadow-xl hover:-translate-y-2'
                 )}
               >
                 {isPopular && (
@@ -191,29 +188,29 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <div className="mb-7 pt-3">
+                <div className="mb-8 pt-3">
                   <div className="flex items-center gap-2.5 mb-3">
-                    <h3 className="font-bold text-xl">{plan.name}</h3>
+                    <h3 className="font-bold text-2xl">{plan.name}</h3>
                     {isPro && <ProBadge size="sm" />}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-5">
+                  <p className="text-base text-muted-foreground mb-6">
                     {plan.description || `Get started with ${plan.name}`}
                   </p>
                   <div className="flex items-baseline gap-1">
                     <span className="text-5xl font-extrabold tracking-tight">
                       ${plan.price}
                     </span>
-                    <span className="text-base text-muted-foreground">
+                    <span className="text-lg text-muted-foreground">
                       /{formatBillingType(plan.billing_type)}
                     </span>
                   </div>
                 </div>
 
-                <ul className="space-y-3.5 mb-8 flex-1">
+                <ul className="space-y-4 mb-10 flex-1">
                   {features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">
+                      <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
+                      <span className="text-base text-muted-foreground">
                         {feature}
                       </span>
                     </li>
@@ -222,10 +219,10 @@ export default function PricingPage() {
 
                 <Button
                   className={cn(
-                    'w-full',
+                    'w-full text-base rounded-xl',
                     isPopular && 'btn-premium shadow-lg'
                   )}
-                  variant={plan.price === 0 ? 'success' : isPopular ? 'default' : 'outline'}
+                  variant={plan.price === 0 ? 'default' : isPopular ? 'default' : 'outline'}
                   size="lg"
                   onClick={() => handlePlanClick(plan)}
                 >
@@ -247,10 +244,10 @@ export default function PricingPage() {
         </div>
 
         {/* Comparison Table */}
-        <div className="mt-20 sm:mt-24 max-w-4xl mx-auto animate-fade-in-up">
-          <h3 className="text-center text-2xl font-bold mb-10">Compare Plans</h3>
-          <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-lg">
-            <div className="grid grid-cols-3 gap-4 p-5 sm:p-6 bg-muted/60 border-b border-border font-bold">
+        <div className="mt-24 sm:mt-28 max-w-4xl mx-auto animate-fade-in-up">
+          <h3 className="text-center text-3xl font-bold mb-12">Compare Plans</h3>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-md">
+            <div className="grid grid-cols-3 gap-4 p-6 bg-muted/40 border-b border-border font-bold text-base">
               <div>Feature</div>
               <div className="text-center">Free</div>
               <div className="text-center">Pro</div>
@@ -268,37 +265,37 @@ export default function PricingPage() {
               <div 
                 key={i} 
                 className={cn(
-                  'grid grid-cols-3 gap-4 p-5 sm:p-6',
-                  i % 2 === 0 ? 'bg-card' : 'bg-muted/30'
+                  'grid grid-cols-3 gap-4 p-6',
+                  i % 2 === 0 ? 'bg-card' : 'bg-muted/20'
                 )}
               >
-                <div className="font-medium">{row.feature}</div>
-                <div className="text-center text-muted-foreground">{row.free}</div>
-                <div className="text-center text-primary font-semibold">{row.pro}</div>
+                <div className="font-medium text-base">{row.feature}</div>
+                <div className="text-center text-muted-foreground text-base">{row.free}</div>
+                <div className="text-center text-primary font-semibold text-base">{row.pro}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* FAQ Link */}
-        <div className="text-center mt-14 sm:mt-16 p-10 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 max-w-2xl mx-auto animate-fade-in">
-          <p className="text-muted-foreground mb-5 text-lg">
+        <div className="text-center mt-16 sm:mt-20 p-12 rounded-2xl bg-primary/[0.04] border border-primary/10 max-w-2xl mx-auto animate-fade-in">
+          <p className="text-muted-foreground mb-6 text-lg">
             Have questions? Check out our FAQ or contact support.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="outline" size="lg" asChild className="text-base rounded-xl">
               <Link to="/faq">
                 View FAQ
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="ghost" size="lg" asChild>
+            <Button variant="ghost" size="lg" asChild className="text-base">
               <Link to="/contact">Contact Support</Link>
             </Button>
           </div>
         </div>
         {seoContent && (
-          <div className="mt-12 max-w-2xl mx-auto text-center">
+          <div className="mt-16 max-w-2xl mx-auto text-center">
             <SeeMoreText text={seoContent} />
           </div>
         )}

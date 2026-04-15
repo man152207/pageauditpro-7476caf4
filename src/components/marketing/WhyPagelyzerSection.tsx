@@ -3,7 +3,6 @@ import { CheckCircle2, XCircle, BarChart3, Lightbulb, Share2, TrendingUp, FileTe
 
 /**
  * "Why Pagelyzer beats Business Suite" marketing comparison section
- * Requirement A1
  */
 export function WhyPagelyzerSection() {
   const comparisonRows = [
@@ -35,30 +34,30 @@ export function WhyPagelyzerSection() {
   ];
 
   return (
-    <section className="section bg-muted/50">
+    <section className="section bg-background">
       <div className="container">
         <div className="section-header">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
             <TrendingUp className="h-4 w-4" />
             Why Switch
           </div>
           <h2>Why Pagelyzer Beats Business Suite</h2>
-          <div className="max-w-2xl mx-auto space-y-2 text-muted-foreground text-lg">
-            <p>Business Suite shows raw dashboards. Pagelyzer turns them into a clean audit report.</p>
+          <div className="max-w-2xl mx-auto space-y-3 text-muted-foreground">
+            <p className="text-lg">Business Suite shows raw dashboards. Pagelyzer turns them into a clean audit report.</p>
             <p className="text-base">Same Facebook data. Better structure, scoring, and next-step actions.</p>
           </div>
         </div>
 
         {/* Comparison Table */}
         <div className="max-w-4xl mx-auto">
-          <div className="rounded-2xl border-2 border-primary/20 overflow-hidden bg-card shadow-xl">
+          <div className="rounded-2xl border border-border overflow-hidden bg-card shadow-md">
             {/* Table Header */}
-            <div className="grid grid-cols-3 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-primary/15">
-              <div className="p-4 sm:p-5 font-bold text-sm sm:text-base">Aspect</div>
-              <div className="p-4 sm:p-5 font-bold text-center text-sm sm:text-base text-muted-foreground">
+            <div className="grid grid-cols-3 bg-primary/[0.04] border-b border-border">
+              <div className="p-5 sm:p-6 font-bold text-base">Aspect</div>
+              <div className="p-5 sm:p-6 font-bold text-center text-base text-muted-foreground">
                 Business Suite
               </div>
-              <div className="p-4 sm:p-5 font-bold text-center text-sm sm:text-base flex items-center justify-center gap-2 text-primary">
+              <div className="p-5 sm:p-6 font-bold text-center text-base flex items-center justify-center gap-2 text-primary">
                 <BarChart3 className="h-4 w-4" />
                 Pagelyzer
               </div>
@@ -68,16 +67,16 @@ export function WhyPagelyzerSection() {
             {comparisonRows.map((row, index) => (
               <div
                 key={index}
-                className="grid grid-cols-3 border-b border-border last:border-b-0 hover:bg-primary/5 transition-colors"
+                className="grid grid-cols-3 border-b border-border last:border-b-0 hover:bg-primary/[0.02] transition-colors"
               >
-                <div className="p-4 sm:p-5 font-medium text-sm sm:text-base">{row.aspect}</div>
-                <div className="p-4 sm:p-5 text-center">
+                <div className="p-5 sm:p-6 font-medium text-base">{row.aspect}</div>
+                <div className="p-5 sm:p-6 text-center">
                   <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <XCircle className="h-4 w-4 text-destructive/70 shrink-0 hidden sm:block" />
+                    <XCircle className="h-4 w-4 text-destructive/60 shrink-0 hidden sm:block" />
                     <span className="text-sm">{row.businessSuite}</span>
                   </div>
                 </div>
-                <div className="p-4 sm:p-5 text-center bg-accent/5">
+                <div className="p-5 sm:p-6 text-center bg-success/[0.03]">
                   <div className="flex items-center justify-center gap-2 text-success font-medium">
                     <CheckCircle2 className="h-4 w-4 shrink-0 hidden sm:block" />
                     <span className="text-sm">{row.pagelyzer}</span>
@@ -94,7 +93,6 @@ export function WhyPagelyzerSection() {
 
 /**
  * "What you get in every audit" checklist section
- * Requirement A2
  */
 export function WhatYouGetSection() {
   const auditFeatures = [
@@ -109,10 +107,10 @@ export function WhatYouGetSection() {
   ];
 
   return (
-    <section className="section-tight">
+    <section className="section bg-muted/30">
       <div className="container">
         <div className="section-header">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 text-primary text-sm font-semibold mb-5">
             <FileText className="h-4 w-4" />
             Complete Package
           </div>
@@ -121,23 +119,23 @@ export function WhatYouGetSection() {
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid sm:grid-cols-2 gap-4">
             {auditFeatures.map((feature, index) => (
               <div
                 key={index}
                 className={cn(
-                  'flex items-center gap-3 p-4 rounded-xl border transition-all',
-                  'bg-card hover:shadow-md hover:border-primary/20',
-                  feature.pro ? 'border-primary/30' : 'border-border'
+                  'flex items-center gap-3 p-5 rounded-xl border transition-all',
+                  'bg-card hover:shadow-md hover:border-primary/15',
+                  feature.pro ? 'border-primary/20' : 'border-border'
                 )}
               >
                 <div className={cn(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
+                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
                   feature.included ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
                 )}>
                   <CheckCircle2 className="h-4 w-4" />
                 </div>
-                <span className="text-sm font-medium flex-1">
+                <span className="text-base font-medium flex-1">
                   {feature.label}
                   {feature.note && (
                     <span className="text-muted-foreground ml-1">({feature.note})</span>
@@ -156,8 +154,7 @@ export function WhatYouGetSection() {
 }
 
 /**
- * CTA Hooks component - 5 social-friendly hooks
- * Requirement A3
+ * CTA Hooks component
  */
 export function CTAHooksSection() {
   const hooks = [
@@ -170,14 +167,14 @@ export function CTAHooksSection() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {hooks.map((hook, index) => (
           <div
             key={index}
-            className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 hover:border-primary/20 transition-all"
+            className="flex items-center gap-3 p-5 rounded-xl bg-primary/[0.04] border border-primary/10 hover:border-primary/20 transition-all"
           >
             <span className="text-2xl">{hook.icon}</span>
-            <span className="text-sm font-medium">{hook.text}</span>
+            <span className="text-base font-medium">{hook.text}</span>
           </div>
         ))}
       </div>
