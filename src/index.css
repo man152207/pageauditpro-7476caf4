@@ -5,43 +5,43 @@
 @tailwind utilities;
 
 /* =====================================================
-   PAGELYZER DESIGN SYSTEM v4.0
-   Premium SaaS - Yoast-inspired purple/green aesthetic
-   Bold typography, pill buttons, gradient hero sections
+   PAGELYZER DESIGN SYSTEM v5.0
+   Meta-inspired clean SaaS — blue/white/gray palette
+   Large typography, generous spacing, product-led
    ===================================================== */
 
 @layer base {
   :root {
-    /* ========== YOAST-INSPIRED BRAND COLORS ========== */
-    /* Primary - Magenta/Purple */
-    --primary: 326 55% 42%;
+    /* ========== META-INSPIRED BRAND COLORS ========== */
+    /* Primary - Facebook/Meta Blue */
+    --primary: 214 89% 52%;
     --primary-foreground: 0 0% 100%;
     
     /* Background - Clean white */
     --background: 0 0% 100%;
-    --foreground: 240 10% 15%;
+    --foreground: 220 14% 10%;
 
     /* Cards - Pure white */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card-foreground: 220 14% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover-foreground: 220 14% 10%;
 
-    /* Secondary - Light gray */
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 15%;
+    /* Secondary - Soft gray */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 14% 10%;
 
     /* Muted */
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* Accent - Yoast Green for trust/success */
-    --accent: 86 66% 43%;
+    /* Accent - Soft indigo/violet Meta accent */
+    --accent: 253 63% 57%;
     --accent-foreground: 0 0% 100%;
 
     /* ========== SEMANTIC COLORS ========== */
-    --success: 86 66% 43%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
@@ -50,76 +50,76 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Pro/Premium - Purple gradient */
-    --pro: 326 55% 42%;
+    /* Pro/Premium - Deep blue */
+    --pro: 214 89% 52%;
     --pro-foreground: 0 0% 100%;
 
     /* ========== UI ELEMENTS ========== */
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 326 55% 42%;
-    --radius: 1.25rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 214 89% 52%;
+    --radius: 0.75rem;
 
     /* ========== CHART COLORS ========== */
-    --chart-1: 326 55% 42%;
-    --chart-2: 86 66% 43%;
-    --chart-3: 287 55% 36%;
-    --chart-4: 78 65% 52%;
-    --chart-5: 262 83% 58%;
+    --chart-1: 214 89% 52%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 253 63% 57%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 330 81% 60%;
 
-    /* ========== YOAST GRADIENT COLORS ========== */
-    --gradient-start: 287 55% 36%;
-    --gradient-mid: 326 55% 42%;
-    --gradient-end: 78 65% 52%;
+    /* ========== GRADIENT COLORS ========== */
+    --gradient-start: 214 89% 52%;
+    --gradient-mid: 230 80% 56%;
+    --gradient-end: 253 63% 57%;
 
     /* ========== PREMIUM SHADOWS ========== */
-    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
-    --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.1), 0 4px 8px -4px rgb(0 0 0 / 0.05);
-    --shadow-xl: 0 24px 32px -6px rgb(0 0 0 / 0.12), 0 10px 12px -6px rgb(0 0 0 / 0.05);
-    --shadow-2xl: 0 32px 56px -12px rgb(0 0 0 / 0.2);
-    --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.03);
-    --shadow-card-hover: 0 16px 32px -8px rgb(0 0 0 / 0.12), 0 6px 12px -6px rgb(0 0 0 / 0.06);
-    --shadow-glow: 0 0 50px -12px hsl(326 55% 42% / 0.4);
-    --shadow-glow-accent: 0 0 50px -12px hsl(86 66% 43% / 0.4);
-    --shadow-button: 0 2px 4px 0 rgb(0 0 0 / 0.08);
-    --shadow-button-hover: 0 6px 12px -2px rgb(0 0 0 / 0.15);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.18);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px 0 rgb(0 0 0 / 0.02);
+    --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    --shadow-glow: 0 0 40px -12px hsl(214 89% 52% / 0.35);
+    --shadow-glow-accent: 0 0 40px -12px hsl(253 63% 57% / 0.35);
+    --shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow-button-hover: 0 4px 12px -2px rgb(0 0 0 / 0.12);
 
     /* ========== SIDEBAR ========== */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 10% 15%;
-    --sidebar-primary: 326 55% 42%;
+    --sidebar-foreground: 220 14% 10%;
+    --sidebar-primary: 214 89% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 240 10% 15%;
-    --sidebar-border: 240 6% 93%;
-    --sidebar-ring: 326 55% 42%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 14% 10%;
+    --sidebar-border: 220 13% 93%;
+    --sidebar-ring: 214 89% 52%;
   }
 
   .dark {
-    --background: 240 10% 6%;
-    --foreground: 0 0% 95%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 10% 9%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 9%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 326 60% 52%;
+    --primary: 214 89% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 8% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 222 47% 14%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 8% 15%;
-    --muted-foreground: 240 5% 60%;
+    --muted: 222 47% 14%;
+    --muted-foreground: 215 20% 55%;
 
-    --accent: 86 66% 48%;
+    --accent: 253 63% 65%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 86 66% 48%;
+    --success: 142 71% 50%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 55%;
@@ -128,25 +128,25 @@
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --pro: 326 60% 52%;
+    --pro: 214 89% 60%;
     --pro-foreground: 0 0% 100%;
 
-    --border: 240 8% 18%;
-    --input: 240 8% 18%;
-    --ring: 326 60% 52%;
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 214 89% 60%;
 
     --shadow-card: 0 2px 10px -2px rgb(0 0 0 / 0.5);
     --shadow-card-hover: 0 20px 40px -10px rgb(0 0 0 / 0.6);
-    --shadow-glow: 0 0 50px -12px hsl(326 60% 52% / 0.3);
+    --shadow-glow: 0 0 40px -12px hsl(214 89% 60% / 0.3);
 
-    --sidebar-background: 240 10% 7%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 326 60% 52%;
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 214 89% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 8% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 240 8% 18%;
-    --sidebar-ring: 326 60% 52%;
+    --sidebar-accent: 222 47% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 214 89% 60%;
   }
 }
 
@@ -161,34 +161,33 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* ========== YOAST-STYLE BOLD TYPOGRAPHY ========== */
-  /* Dashboard-optimized typography with increased sizes for impact */
+  /* ========== META-INSPIRED BOLD TYPOGRAPHY ========== */
   h1 {
-    @apply text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+    @apply text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
     color: hsl(var(--foreground));
   }
 
   h2 {
-    @apply text-2xl sm:text-3xl md:text-[2.25rem] font-extrabold tracking-tight;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    @apply text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
   }
 
   h3 {
-    @apply text-xl sm:text-2xl font-bold;
+    @apply text-2xl sm:text-3xl font-bold;
     line-height: 1.2;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 
   h4 {
-    @apply text-lg sm:text-xl font-bold;
+    @apply text-xl sm:text-2xl font-bold;
     line-height: 1.25;
   }
 
   p {
-    @apply text-[15px] sm:text-base leading-relaxed;
+    @apply text-base sm:text-lg leading-relaxed;
     color: hsl(var(--muted-foreground));
   }
 
@@ -219,7 +218,6 @@
 
 @layer components {
   /* ========== STANDARDIZED DASHBOARD CONTAINER ========== */
-  /* Default: comfortable mode with wider max-width for data-dense layouts */
   .dashboard-container {
     @apply w-full max-w-[1400px] 2xl:max-w-[1560px] mx-auto px-4 sm:px-5 lg:px-6;
   }
@@ -228,7 +226,6 @@
     @apply w-full max-w-[1400px] 2xl:max-w-[1560px] mx-auto;
   }
 
-  /* Expanded container for larger screens */
   .dashboard-container-wide {
     @apply w-full max-w-[1560px] 2xl:max-w-[1700px] mx-auto px-4 sm:px-5 lg:px-6;
   }
@@ -245,7 +242,6 @@
     @apply p-3 sm:p-4 rounded-xl border border-border bg-card;
   }
 
-  /* Report-specific compact utilities */
   .report-grid-tight {
     @apply gap-3 sm:gap-4;
   }
@@ -255,7 +251,6 @@
   }
 
   /* ========== COMPACT DENSITY MODE ========== */
-  /* Applied when html has .density-compact class */
   .density-compact .dashboard-container,
   .density-compact .report-container {
     @apply max-w-[1600px] 2xl:max-w-[1800px];
@@ -289,7 +284,6 @@
     @apply mb-5 sm:mb-6;
   }
 
-  /* Reduce grid gaps in compact mode */
   .density-compact .gap-4 {
     gap: 0.625rem !important;
   }
@@ -315,7 +309,6 @@
   }
 
   /* ========== COMPACT MODE: REPORT COMPONENTS ========== */
-  /* Executive Summary */
   .density-compact .executive-summary {
     @apply p-4 sm:p-5;
   }
@@ -324,7 +317,6 @@
     @apply text-xl sm:text-2xl mb-2;
   }
 
-  /* Score cards in compact mode */
   .density-compact .score-card {
     @apply p-3 sm:p-4;
   }
@@ -333,7 +325,6 @@
     @apply text-3xl sm:text-4xl;
   }
 
-  /* Hero Score Section */
   .density-compact .hero-score-section {
     @apply py-4 sm:py-5;
   }
@@ -342,7 +333,6 @@
     @apply text-5xl sm:text-6xl;
   }
 
-  /* Action Cards */
   .density-compact .action-card {
     @apply p-3 sm:p-4;
   }
@@ -355,7 +345,6 @@
     @apply text-xs;
   }
 
-  /* Chart containers */
   .density-compact .chart-container {
     @apply min-h-[180px];
   }
@@ -364,7 +353,6 @@
     font-size: 11px;
   }
 
-  /* Tables */
   .density-compact table th,
   .density-compact table td {
     @apply py-2 px-2.5 text-xs;
@@ -375,7 +363,6 @@
     @apply py-2 px-2;
   }
 
-  /* Post cards */
   .density-compact .post-card {
     @apply p-3;
   }
@@ -384,7 +371,6 @@
     @apply w-12 h-12;
   }
 
-  /* Sidebar in compact mode */
   .density-compact .report-sidebar {
     @apply p-3 sm:p-4 gap-3;
   }
@@ -393,7 +379,6 @@
     @apply text-sm font-semibold;
   }
 
-  /* Benchmarks card */
   .density-compact .benchmarks-card {
     @apply p-3;
   }
@@ -402,7 +387,6 @@
     @apply py-1.5;
   }
 
-  /* Demographics section */
   .density-compact .demographics-section {
     @apply p-4;
   }
@@ -411,7 +395,6 @@
     @apply min-h-[160px];
   }
 
-  /* AI Insights */
   .density-compact .ai-insights-section {
     @apply p-4;
   }
@@ -420,7 +403,6 @@
     @apply text-base mb-2;
   }
 
-  /* Creative Preview */
   .density-compact .creative-preview {
     @apply p-3;
   }
@@ -429,7 +411,6 @@
     @apply w-16 h-16 sm:w-20 sm:h-20;
   }
 
-  /* Report header */
   .density-compact .report-header {
     @apply py-3 px-4;
   }
@@ -438,52 +419,49 @@
     @apply text-lg sm:text-xl;
   }
 
-  /* Tab content spacing */
   .density-compact [role="tabpanel"] {
     @apply pt-3;
   }
 
-  /* Reduce card borders in compact mode */
   .density-compact .border {
     border-width: 1px;
   }
 
-  /* Compact tooltips */
   .density-compact [data-radix-popper-content-wrapper] {
     font-size: 12px;
   }
 
   /* ========== GENEROUS SECTION SPACING ========== */
   .section {
-    @apply py-16 sm:py-20 md:py-24;
+    @apply py-20 sm:py-24 md:py-28;
   }
 
   .section-tight {
-    @apply py-12 sm:py-16 md:py-20;
+    @apply py-14 sm:py-18 md:py-22;
   }
 
   .section-header {
-    @apply text-center max-w-2xl mx-auto mb-10 sm:mb-12 md:mb-16;
+    @apply text-center max-w-3xl mx-auto mb-12 sm:mb-16 md:mb-20;
   }
 
   .section-header h2 {
-    @apply mb-3 sm:mb-4;
+    @apply mb-4 sm:mb-5;
     color: hsl(var(--foreground));
   }
 
   .section-header p {
-    @apply text-base sm:text-lg text-muted-foreground;
+    @apply text-lg sm:text-xl text-muted-foreground leading-relaxed;
   }
 
   /* ========== PREMIUM CARDS ========== */
   .premium-card {
-    @apply relative rounded-2xl border border-border bg-card p-6 sm:p-7;
+    @apply relative rounded-2xl border border-border bg-card p-6 sm:p-8;
     box-shadow: var(--shadow-sm);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .premium-card:hover {
-    @apply border-primary/25;
+    @apply border-primary/20;
     box-shadow: var(--shadow-card-hover);
     transform: translateY(-4px);
   }
@@ -496,7 +474,7 @@
   .interactive-card:hover {
     @apply border-primary/20;
     box-shadow: var(--shadow-md);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
   .glass-card {
@@ -524,9 +502,9 @@
     @apply text-sm font-medium text-muted-foreground mt-0.5;
   }
 
-  /* ========== FEATURE ICONS (Icon Containers) ========== */
+  /* ========== FEATURE ICONS ========== */
   .feature-icon {
-    @apply flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl transition-all duration-300;
+    @apply flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl transition-all duration-300;
   }
 
   .feature-icon-primary {
@@ -557,10 +535,10 @@
     @apply feature-icon bg-muted text-muted-foreground;
   }
 
-  /* ========== YOAST-STYLE GRADIENTS ========== */
+  /* ========== GRADIENTS ========== */
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--primary)) 50%, hsl(var(--accent)) 100%);
+    background-image: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--gradient-end)) 100%);
   }
 
   .gradient-bg-primary {
@@ -572,15 +550,15 @@
   }
 
   .gradient-bg-hero {
-    background: linear-gradient(135deg, hsl(287 55% 36% / 0.95) 0%, hsl(326 55% 42%) 40%, hsl(78 65% 52% / 0.8) 100%);
+    background: linear-gradient(135deg, hsl(214 89% 52%) 0%, hsl(230 80% 50%) 40%, hsl(253 63% 52%) 100%);
   }
 
   .gradient-bg-hero-soft {
-    background: linear-gradient(135deg, hsl(287 55% 36% / 0.1) 0%, hsl(326 55% 42% / 0.08) 40%, hsl(78 65% 52% / 0.06) 100%);
+    background: linear-gradient(135deg, hsl(214 89% 52% / 0.06) 0%, hsl(230 80% 50% / 0.04) 40%, hsl(253 63% 52% / 0.03) 100%);
   }
 
   .gradient-border {
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--primary)), hsl(var(--accent)));
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
   }
 
   /* ========== BADGES ========== */
@@ -611,24 +589,22 @@
 
   .badge-effort-easy {
     @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md;
-    @apply bg-accent/10 text-accent;
+    @apply bg-primary/10 text-primary;
   }
 
   .pro-badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full uppercase tracking-wide;
-    background: linear-gradient(135deg, hsl(var(--pro)) 0%, hsl(30 90% 55%) 100%);
+    background: linear-gradient(135deg, hsl(var(--pro)) 0%, hsl(253 63% 57%) 100%);
     color: hsl(var(--pro-foreground));
     box-shadow: 0 2px 8px hsl(var(--pro) / 0.35);
   }
 
-  /* ========== PLAN BADGES (Pro/Free Differentiation) ========== */
+  /* ========== PLAN BADGES ========== */
   .plan-badge-pro {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full uppercase tracking-wide;
-    background: linear-gradient(135deg, hsl(30 90% 55%) 0%, hsl(45 95% 50%) 50%, hsl(30 85% 50%) 100%);
-    color: hsl(30 10% 15%);
-    box-shadow: 0 2px 12px hsl(38 92% 50% / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.3);
-    text-shadow: 0 1px 0 rgb(255 255 255 / 0.2);
-    animation: shimmer-gold 3s infinite;
+    background: linear-gradient(135deg, hsl(214 89% 52%) 0%, hsl(253 63% 57%) 100%);
+    color: white;
+    box-shadow: 0 2px 12px hsl(214 89% 52% / 0.4);
   }
 
   .plan-badge-free {
@@ -636,31 +612,28 @@
     @apply bg-muted text-muted-foreground border border-border;
   }
 
-  /* Pro card accent border */
   .pro-accent-border {
     @apply border-2;
-    border-color: hsl(38 92% 50% / 0.3);
-    box-shadow: 0 0 20px -5px hsl(38 92% 50% / 0.15);
+    border-color: hsl(214 89% 52% / 0.3);
+    box-shadow: 0 0 20px -5px hsl(214 89% 52% / 0.15);
   }
 
   .pro-accent-border:hover {
-    border-color: hsl(38 92% 50% / 0.5);
-    box-shadow: 0 0 30px -5px hsl(38 92% 50% / 0.25);
+    border-color: hsl(214 89% 52% / 0.5);
+    box-shadow: 0 0 30px -5px hsl(214 89% 52% / 0.25);
   }
 
-  /* Pro indicator for report pages */
   .pro-report-indicator {
     @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium;
-    background: linear-gradient(135deg, hsl(38 92% 50% / 0.1) 0%, hsl(45 95% 50% / 0.05) 100%);
-    border: 1px solid hsl(38 92% 50% / 0.25);
-    color: hsl(38 80% 40%);
+    background: linear-gradient(135deg, hsl(214 89% 52% / 0.1) 0%, hsl(253 63% 57% / 0.05) 100%);
+    border: 1px solid hsl(214 89% 52% / 0.25);
+    color: hsl(214 89% 45%);
   }
 
   .dark .pro-report-indicator {
-    color: hsl(38 92% 60%);
+    color: hsl(214 89% 65%);
   }
 
-  /* Free report limited preview indicator */
   .free-report-indicator {
     @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium;
     @apply bg-muted/50 border border-border text-muted-foreground;
@@ -680,7 +653,7 @@
   }
 
   .score-excellent { @apply bg-success/10 text-success border-success/15; }
-  .score-good { @apply bg-accent/10 text-accent border-accent/15; }
+  .score-good { @apply bg-primary/10 text-primary border-primary/15; }
   .score-average { @apply bg-warning/10 text-warning border-warning/15; }
   .score-poor { @apply bg-destructive/10 text-destructive border-destructive/15; }
 
@@ -717,7 +690,6 @@
     @apply translate-x-0.5;
   }
 
-  /* Active state with left accent bar */
   .sidebar-nav-item-bar {
     @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative;
     @apply text-muted-foreground hover:bg-muted/70 hover:text-foreground;
@@ -732,7 +704,7 @@
     @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full;
   }
 
-  /* ========== YOAST-STYLE BUTTONS ========== */
+  /* ========== BUTTONS ========== */
   .btn-interactive {
     @apply transition-all duration-250;
     box-shadow: var(--shadow-xs);
@@ -740,7 +712,7 @@
 
   .btn-interactive:hover:not(:disabled) {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .btn-interactive:active:not(:disabled) {
@@ -753,29 +725,29 @@
   }
 
   .btn-glow:hover {
-    box-shadow: 0 0 60px -12px hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 50px -12px hsl(var(--primary) / 0.5);
   }
 
   .btn-premium {
-    @apply relative overflow-hidden rounded-full;
-    background: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--primary)) 100%);
+    @apply relative overflow-hidden rounded-xl;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--gradient-end)) 100%);
     box-shadow: var(--shadow-button), inset 0 1px 0 0 rgb(255 255 255 / 0.15);
   }
 
   .btn-premium:hover {
     box-shadow: var(--shadow-button-hover), inset 0 1px 0 0 rgb(255 255 255 / 0.2);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
   .btn-success {
-    @apply rounded-full bg-accent text-accent-foreground;
+    @apply rounded-xl bg-primary text-primary-foreground;
     box-shadow: var(--shadow-button);
   }
 
   .btn-success:hover {
-    @apply bg-accent/90;
+    @apply bg-primary/90;
     box-shadow: var(--shadow-button-hover);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   /* ========== EMPTY STATES ========== */
@@ -845,41 +817,48 @@
     @apply flex-1 h-0.5 bg-border mx-4;
   }
 
-  /* ========== YOAST-STYLE HERO PATTERNS ========== */
+  /* ========== HERO PATTERNS ========== */
   .hero-pattern {
     background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(326 55% 42% / 0.1) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 80% 50%, hsl(86 66% 43% / 0.08) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(214 89% 52% / 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 50%, hsl(253 63% 57% / 0.05) 0%, transparent 50%);
   }
 
   .hero-pattern-premium {
     background: linear-gradient(135deg, 
-      hsl(287 60% 28%) 0%, 
-      hsl(326 65% 38%) 35%, 
-      hsl(326 60% 42%) 55%,
-      hsl(86 70% 38%) 100%
+      hsl(214 89% 48%) 0%, 
+      hsl(224 85% 50%) 40%, 
+      hsl(240 75% 52%) 70%,
+      hsl(253 63% 52%) 100%
     );
   }
 
   .hero-pattern-mini {
     background: linear-gradient(135deg, 
-      hsl(287 60% 28%) 0%, 
-      hsl(326 65% 38%) 50%, 
-      hsl(86 70% 38%) 100%
+      hsl(214 89% 48%) 0%, 
+      hsl(230 80% 50%) 50%, 
+      hsl(253 63% 52%) 100%
+    );
+  }
+
+  .hero-pattern-soft {
+    background: linear-gradient(180deg, 
+      hsl(214 89% 52% / 0.04) 0%,
+      hsl(0 0% 100%) 100%
     );
   }
 
   .floating-orb {
-    @apply absolute rounded-full blur-3xl opacity-30;
+    @apply absolute rounded-full blur-3xl opacity-20;
     animation: float-slow 12s ease-in-out infinite;
   }
 
   .floating-orb-purple {
-    background: linear-gradient(135deg, hsl(287 60% 40% / 0.6), hsl(326 65% 45% / 0.4));
+    background: linear-gradient(135deg, hsl(253 63% 57% / 0.5), hsl(214 89% 52% / 0.3));
   }
 
   .floating-orb-green {
-    background: linear-gradient(135deg, hsl(86 70% 45% / 0.5), hsl(86 66% 43% / 0.3));
+    background: linear-gradient(135deg, hsl(214 89% 52% / 0.4), hsl(253 63% 57% / 0.2));
   }
 
   /* ========== WAVE SECTION DIVIDER ========== */
@@ -899,7 +878,7 @@
 
   /* ========== GRADIENT ACCENT CARD ========== */
   .gradient-accent-card {
-    @apply relative rounded-2xl border border-border bg-card p-6 sm:p-7 overflow-hidden;
+    @apply relative rounded-2xl border border-border bg-card p-7 sm:p-8 overflow-hidden;
     box-shadow: var(--shadow-sm);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -907,19 +886,19 @@
   .gradient-accent-card::before {
     content: '';
     @apply absolute top-0 left-0 right-0 h-1;
-    background: linear-gradient(90deg, hsl(var(--gradient-start)), hsl(var(--primary)), hsl(var(--accent)));
+    background: linear-gradient(90deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
   }
 
   .gradient-accent-card:hover {
-    @apply border-primary/25;
+    @apply border-primary/20;
     box-shadow: var(--shadow-card-hover);
-    transform: translateY(-6px);
+    transform: translateY(-4px);
   }
 
   /* ========== FLOATING MOCKUP CARD ========== */
   .mockup-card {
     @apply relative rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-6 text-white;
-    box-shadow: 0 25px 60px -12px rgb(0 0 0 / 0.4), 0 0 40px -10px hsl(326 65% 45% / 0.3);
+    box-shadow: 0 25px 60px -12px rgb(0 0 0 / 0.3), 0 0 40px -10px hsl(214 89% 52% / 0.2);
     animation: float-slow 8s ease-in-out infinite;
   }
 
@@ -1008,28 +987,27 @@
     @apply h-10 w-24;
   }
 
-  /* ========== YOAST-STYLE MOST POPULAR BADGE ========== */
+  /* ========== MOST POPULAR BADGE ========== */
   .popular-badge {
     @apply absolute -top-3.5 left-1/2 -translate-x-1/2 z-10;
     @apply px-5 py-2 text-xs font-bold rounded-full uppercase tracking-wide;
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--primary)));
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
     color: hsl(var(--primary-foreground));
-    box-shadow: var(--shadow-lg), 0 0 30px -8px hsl(var(--primary) / 0.5);
+    box-shadow: var(--shadow-lg), 0 0 30px -8px hsl(var(--primary) / 0.4);
   }
 
   .popular-card {
     @apply relative;
-    border: 2px solid hsl(var(--primary) / 0.5);
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1), var(--shadow-xl), 0 0 50px -20px hsl(var(--primary) / 0.3);
+    border: 2px solid hsl(var(--primary) / 0.4);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1), var(--shadow-xl), 0 0 40px -20px hsl(var(--primary) / 0.2);
   }
 
   .popular-card::before {
     content: '';
     @apply absolute inset-0 rounded-[1.5rem] pointer-events-none;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, transparent 50%);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.06) 0%, transparent 50%);
   }
 
-  /* Trust rating stars */
   .trust-stars {
     @apply inline-flex items-center gap-0.5;
   }
@@ -1038,7 +1016,6 @@
     @apply h-4 w-4 text-yellow-400 fill-yellow-400;
   }
 
-  /* Pill button override */
   .btn-pill {
     @apply rounded-full px-8;
   }
@@ -1060,7 +1037,7 @@
   }
 
   .card-hover-lift:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-card-hover);
   }
 
@@ -1069,8 +1046,8 @@
   }
 
   .card-hover-glow:hover {
-    @apply border-primary/30;
-    box-shadow: 0 0 30px -8px hsl(var(--primary) / 0.2);
+    @apply border-primary/25;
+    box-shadow: 0 0 25px -8px hsl(var(--primary) / 0.15);
   }
 
   .icon-hover-pop {
@@ -1279,7 +1256,7 @@
 
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-15px) scale(1.02); }
+  50% { transform: translateY(-12px) scale(1.01); }
 }
 
 @keyframes fade-in {
@@ -1385,8 +1362,8 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.25); }
-  50% { box-shadow: 0 0 40px -5px hsl(var(--primary) / 0.4); }
+  0%, 100% { box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.2); }
+  50% { box-shadow: 0 0 35px -5px hsl(var(--primary) / 0.35); }
 }
 
 /* =====================================================
