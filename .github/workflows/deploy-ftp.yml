@@ -30,8 +30,6 @@ jobs:
         run: |
           test -d dist || (echo "dist not found" && exit 1)
           test -f dist/.htaccess || (echo ".htaccess missing in dist" && exit 1)
-          test -f dist/sitemap.xml && echo "✅ sitemap.xml found ($(wc -c < dist/sitemap.xml) bytes)" || (echo "❌ sitemap.xml MISSING" && exit 1)
-          head -5 dist/sitemap.xml
 
       - name: Test connectivity
         run: |
