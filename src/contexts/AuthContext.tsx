@@ -1,6 +1,24 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+
+// Local types matching PHP backend response format (no @supabase/supabase-js dependency)
+export interface User {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, any>;
+  app_metadata?: Record<string, any>;
+  aud?: string;
+  created_at?: string;
+}
+
+export interface Session {
+  user: User;
+  access_token: string;
+  refresh_token?: string;
+  expires_at?: number;
+  expires_in?: number;
+  token_type?: string;
+}
 
 export type AppRole = 'super_admin' | 'admin' | 'user';
 
@@ -251,7 +269,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Only fetch on SIGNED_IN or TOKEN_REFRESHED events, not initial
         // Initial fetch is handled by getSession below
-        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
           setTimeout(() => {
             if (isMounted) {
               fetchUserData(session.user.id);
