@@ -269,7 +269,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Only fetch on SIGNED_IN or TOKEN_REFRESHED events, not initial
         // Initial fetch is handled by getSession below
-        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
           setTimeout(() => {
             if (isMounted) {
               fetchUserData(session.user.id);
