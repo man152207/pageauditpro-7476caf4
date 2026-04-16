@@ -35,7 +35,7 @@ export function useScheduledPosts(targetUserId?: string) {
         .from("scheduled_posts")
         .select("*, fb_connections(page_name)")
         .eq("user_id", effectiveUserId!)
-        .order("scheduled_at", { ascending: true, nullsFirst: false });
+        .order("scheduled_at", { ascending: true });
       if (error) throw error;
       return (data || []) as ScheduledPost[];
     },

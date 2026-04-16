@@ -30,7 +30,7 @@ export default function PublicReportPage() {
     queryKey: ['public-report', shareSlug],
     queryFn: async () => {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-public-report?slug=${shareSlug}`,
+        `/api/get-public-report.php?slug=${shareSlug}`,
         {
           method: 'GET',
           headers: {
