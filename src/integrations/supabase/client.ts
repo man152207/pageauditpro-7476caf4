@@ -54,10 +54,27 @@ async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}/${endpoint}`, {
+  const url = `${API_BASE}/${endpoint}`;
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+
+  // Detect non-JSON responses (e.g. HTML 404 pages)
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await response.text();
+    if (text.trim().startsWith('<')) {
+      throw new Error(`API endpoint not reachable at ${url} — server returned HTML instead of JSON. Check that PHP files exist in /api/ folder.`);
+    }
+    // Try parsing anyway in case content-type header is missing but body is JSON
+    try {
+      const data = JSON.parse(text);
+      return { response, data };
+    } catch {
+      throw new Error(`API endpoint ${url} returned invalid response: ${text.substring(0, 100)}`);
+    }
+  }
 
   const data = await response.json();
   return { response, data };
