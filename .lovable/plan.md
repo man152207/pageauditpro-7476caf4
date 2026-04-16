@@ -1,138 +1,85 @@
 
 
-# Full PHP Backend Migration for cPanel Hosting
+# Complete Deployable ZIP for cPanel — No Changes Needed After Upload
 
-## Reality Check
+## What I'll Do
 
-This is a **very large project**. Your app currently has:
+Generate a single `pagelyzer_cpanel_ready.zip` that you upload to `public_html/` on cPanel and it works immediately. No code editing, no configuration needed.
 
-- **20 Edge Functions** (server-side logic) that need PHP rewrites
-- **40+ files** with direct database queries (Supabase SDK calls)
-- **Authentication system** (signup, login, session management, Facebook OAuth)
-- **File storage** (post-media, blog-images buckets)
-- **Webhooks** (Stripe, Facebook, PayPal)
-- **Cron jobs** (auto-audit, weekly emails)
+## The Challenge
 
-All of this needs to be converted from Supabase/Deno to PHP/MariaDB. This is essentially rebuilding the entire backend.
+Your React frontend currently calls Supabase SDK (`supabase.from()`, `supabase.auth.*`, `supabase.functions.invoke()`) and uses `import.meta.env.VITE_SUPABASE_URL` for edge function calls. These won't work with your PHP backend on cPanel.
 
-## What I'll Generate
+## What I'll Build
 
-### Phase 1: PHP Backend API (priority)
+### 1. New `src/integrations/supabase/client.ts` — Drop-in PHP API Wrapper
 
-**File: `api/config.php`** — Database connection to `adsmpgco_Pagelyzer`
+Instead of modifying 48 files, I'll **replace the single Supabase client file** with a wrapper that mimics the exact same API but routes to your PHP backend:
+
 ```text
-- MariaDB connection using PDO
-- DB host, user, password as constants
-- Session/JWT configuration
+supabase.from('audits').select('*').eq('user_id', id)  →  POST /api/data.php
+supabase.auth.signUp(...)                               →  POST /api/auth.php?action=signup
+supabase.auth.signInWithPassword(...)                   →  POST /api/auth.php?action=login
+supabase.functions.invoke('run-audit', {body})          →  POST /api/run-audit.php
+supabase.storage.from('blog-images').upload(...)        →  POST /api/upload.php
 ```
 
-**File: `api/auth.php`** — Authentication endpoints
+This means **zero changes to the other 47 files** — they keep importing `supabase` from the same path and calling the same methods.
+
+### 2. Replace `VITE_SUPABASE_URL` References (5 files)
+
+The 5 files that use `import.meta.env.VITE_SUPABASE_URL` directly for `fetch()` calls will be updated to use the PHP API base URL instead.
+
+### 3. Build Production `dist/`
+
+Run `npm run build` → production-ready static files.
+
+### 4. Package Everything
+
 ```text
-- POST /api/auth.php?action=signup
-- POST /api/auth.php?action=login
-- POST /api/auth.php?action=logout
-- JWT token generation (using firebase/php-jwt or simple session)
-- Password hashing with password_hash()
-```
-
-**File: `api/middleware.php`** — Auth middleware
-```text
-- JWT/session validation
-- Role checking (is_super_admin, has_role, is_admin_or_above)
-```
-
-**20 PHP API files** replacing each edge function:
-```text
-api/check-subscription.php
-api/run-audit.php
-api/get-audit-report.php
-api/get-public-report.php
-api/facebook-oauth.php
-api/facebook-auth-login.php
-api/facebook-webhook.php
-api/create-checkout.php
-api/stripe-webhook.php
-api/paypal-checkout.php
-api/esewa-checkout.php
-api/generate-ai-insights.php
-api/generate-pdf-report.php
-api/share-report.php
-api/schedule-post.php
-api/publish-scheduled-posts.php
-api/send-audit-email.php
-api/send-pro-welcome-email.php
-api/weekly-email-cron.php
-api/admin-delete-user.php
-api/seed-test-users.php
-api/sitemap.php
-```
-
-### Phase 2: Frontend Modifications
-
-**New file: `src/lib/api.ts`** — Replace Supabase SDK with fetch calls
-```text
-- apiClient class wrapping fetch() to /api/*.php endpoints
-- Auth token management (localStorage JWT)
-- Replaces all supabase.functions.invoke() calls
-- Replaces all supabase.from().select/insert/update/delete() calls
-- Replaces supabase.auth.* calls
-```
-
-**Modify 40+ files** — Replace every `supabase.*` call with `apiClient.*`
-
-### Phase 3: File Upload Handling
-
-**File: `api/upload.php`** — File storage
-```text
-- Handle image uploads to cPanel filesystem (public_html/uploads/)
-- Return public URLs
-- Replace Supabase Storage bucket calls
-```
-
-### Phase 4: Deployment Package
-
-**Output: `/mnt/documents/pagelyzer_cpanel_package.zip`**
-```text
-pagelyzer_cpanel/
-├── api/                    # All PHP backend files
-│   ├── config.php          # DB connection (user fills credentials)
+pagelyzer_cpanel_ready/
+├── api/                     # PHP backend (already generated, with DB creds pre-filled)
+│   ├── config.php           # DB: adsmpgco_Pagelyzer, User: adsmpgco_Pagelyzer, Pass: Unknown@112
 │   ├── auth.php
+│   ├── data.php
 │   ├── middleware.php
-│   ├── ...20 API files...
+│   ├── run-audit.php
+│   ├── ... (all 29 PHP files)
 │   └── upload.php
-├── uploads/                # Empty dir for file storage
-├── dist/                   # Built React frontend
-│   ├── index.html
-│   ├── assets/
-│   └── .htaccess           # SPA routing
-├── .htaccess               # Root rewrite rules
-└── SETUP.md                # Step-by-step setup guide
+├── uploads/                 # Empty dir for file storage
+├── index.html               # React app entry
+├── assets/                  # JS/CSS bundles
+├── favicon.png
+├── og-image.png
+├── robots.txt
+├── .htaccess                # SPA routing + API rewrite
+└── SETUP.md                 # Quick reference
 ```
 
-### Phase 5: Setup Instructions (SETUP.md)
+## Upload Steps (after you get the ZIP)
 
 ```text
-1. Upload zip contents to public_html/ via cPanel File Manager
-2. Edit api/config.php with your MariaDB credentials:
-   - DB_HOST: localhost
-   - DB_NAME: adsmpgco_Pagelyzer
-   - DB_USER: cpses_adiafxm1yu
-   - DB_PASS: (your password)
-3. Database is already imported (done)
-4. Set file permissions: api/ folder 755, uploads/ folder 777
-5. Update .env values in dist/ for API base URL
-6. Test: visit yourdomain.com — should load the app
+1. Go to cPanel → File Manager → pagelyzer.io/
+2. Upload pagelyzer_cpanel_ready.zip
+3. Extract it (right-click → Extract)
+4. Done — visit https://pagelyzer.io
 ```
 
-## Important Notes
+No editing needed. DB credentials are pre-filled. `.htaccess` routing is included.
 
-- **Facebook App Settings**: You'll need to update Facebook App's redirect URIs to point to your cPanel domain
-- **Stripe/PayPal Webhooks**: Need to update webhook URLs in their dashboards
-- **Cron Jobs**: Set up cPanel cron jobs for auto-audit and weekly emails
-- **SSL**: cPanel domain must have SSL for OAuth and payment webhooks
-- **API Keys**: Your `settings` table already has the keys — PHP will read from MariaDB directly
+## Files Modified in This Project
 
-## Estimated Output
+| File | Change |
+|------|--------|
+| `src/integrations/supabase/client.ts` | Replace with PHP API wrapper (same export interface) |
+| `src/contexts/AuthContext.tsx` | Point fetch URLs to `/api/` |
+| `src/hooks/useAudits.ts` | Point fetch URLs to `/api/` |
+| `src/components/audit/AuditFlow.tsx` | Point fetch URLs to `/api/` |
+| `src/pages/PublicReportPage.tsx` | Point fetch URL to `/api/` |
 
-The zip file will be ~2-5MB containing all PHP backend files, built frontend, and configuration. This is a complete self-hosted package.
+That's it — only 5 files need changes. The wrapper approach means all other 43 files work without modification.
+
+## Output
+
+Single ZIP file: `/mnt/documents/pagelyzer_cpanel_ready.zip` (~3-5MB)
 
