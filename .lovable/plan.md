@@ -1,69 +1,44 @@
 
-## Why this build failed
 
-I checked the current codebase, and the files are already fixed here:
+# PostgreSQL → MySQL Schema Conversion (.sql file)
 
-- `package.json` now has:
-  ```json
-  "build": "vite build"
-  ```
-- `src/index.css` already starts with the Google Fonts `@import`
-- `.github/workflows/deploy-ftp.yml` only verifies `dist/` and `dist/.htaccess`
+## What this does
+Export the entire Pagelyzer database schema (all 18+ tables, enums, functions, indexes) from PostgreSQL format and convert it to MySQL-compatible SQL — delivered as a downloadable `.sql` file.
 
-So the GitHub Actions log you shared is not using this updated state. It is running an older commit/version where:
+## Conversion steps
 
-- `package.json` still had:
-  ```json
-  "build": "vite build && node scripts/verify-sitemap.mjs"
-  ```
-- `src/index.css` still had the font `@import` below Tailwind directives
+1. **Extract full schema** — Query `information_schema` to get all tables, columns, data types, defaults, constraints, and indexes.
 
-## What the log means
+2. **Convert PostgreSQL → MySQL syntax**:
+   - `uuid` → `CHAR(36)` with `UUID()` default
+   - `text` → `TEXT` or `VARCHAR(255)` depending on usage
+   - `jsonb` → `JSON`
+   - `timestamp with time zone` → `DATETIME`
+   - `boolean` → `TINYINT(1)`
+   - `inet` → `VARCHAR(45)`
+   - `numeric` → `DECIMAL(10,2)`
+   - `text[]` (arrays) → separate junction table or `JSON`
+   - PostgreSQL enums (`app_role`, `audit_type`, etc.) → MySQL `ENUM(...)`
+   - `gen_random_uuid()` → commented note (MySQL 8 has `UUID()`)
+   - `now()` → `CURRENT_TIMESTAMP`
+   - RLS policies → added as SQL comments (MySQL has no RLS equivalent)
 
-1. **Actual failure**
-   - `❌ dist/sitemap.xml is missing!`
-   - This is the real reason the job exited with code 1.
-   - The old sitemap verification script is still being executed in that GitHub build.
+3. **Include**:
+   - All CREATE TABLE statements
+   - Primary keys and unique constraints
+   - Index definitions
+   - Enum type mappings
+   - Foreign key relationships (as comments, since original uses no FK constraints)
+   - RLS policies documented as comments
+   - Database functions as comments (MySQL stored procedure equivalents noted)
 
-2. **Secondary warning**
-   - `[vite:css] @import must precede all other statements`
-   - This comes from the old CSS order.
-   - Vite still completed the build, so this is not what stopped deployment.
+4. **Output**: Write to `/mnt/documents/pagelyzer_mysql_schema.sql`
 
-3. **Unrelated warning**
-   - `Node.js 20 actions are deprecated`
-   - This is only a future compatibility warning, not today’s failure.
+## Tables covered
+`audit_logs`, `audit_metrics`, `audit_schedules`, `audits`, `blog_posts`, `content_calendar`, `fb_connections`, `free_audit_grants`, `organizations`, `page_seo`, `payments`, `plans`, `profiles`, `reports`, `scheduled_posts`, `security_events`, `settings`, `subscriptions`, `user_roles`
 
-## Root cause
+## Important note
+- RLS (Row Level Security) has no MySQL equivalent — policies will be documented as comments
+- PostgreSQL functions (`is_super_admin`, `has_role`, etc.) will be converted to MySQL stored function syntax where possible
+- Array columns will be converted to JSON type
 
-Most likely one of these is true:
-
-- the CI-fix commit was not actually pushed to GitHub `main`
-- the failing workflow run belongs to an earlier commit before the fix
-- GitHub is building a branch/commit that still contains the old files
-
-## Fix plan
-
-1. Verify the GitHub repo’s `main` branch contains these exact changes:
-   - `package.json` → `"build": "vite build"`
-   - `src/index.css` → `@import` moved to the first line
-   - `scripts/verify-sitemap.mjs` removed
-   - `scripts/generate-sitemap.mjs` removed
-
-2. Push/sync those files if GitHub still shows the old versions.
-
-3. Re-run the workflow after that commit is on `main`.
-
-4. Optional cleanup after deploy is green:
-   - update workflow actions later for Node 24 support to remove the deprecation warning
-
-## Technical note
-
-Because the log still shows:
-```bash
-> vite build && node scripts/verify-sitemap.mjs
-```
-the checked-out GitHub commit definitely still had the old `package.json`. If GitHub had the latest fixed file, that line would simply be:
-```bash
-> vite build
-```
