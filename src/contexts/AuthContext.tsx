@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-subscription`,
+        `/api/check-subscription.php`,
         {
           headers: {
             Authorization: `Bearer ${tokenToUse}`,

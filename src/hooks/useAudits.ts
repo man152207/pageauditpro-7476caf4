@@ -59,7 +59,7 @@ export function useAudit(auditId: string | undefined) {
 
       // Call edge function with query param for gated report data
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-audit-report?audit_id=${auditId}`,
+        `/api/get-audit-report.php?audit_id=${auditId}`,
         {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -169,7 +169,7 @@ export function useRunAudit() {
       const dateRange = typeof params === 'string' ? undefined : params.dateRange;
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-audit`,
+        `/api/run-audit.php`,
         {
           method: 'POST',
           headers: {

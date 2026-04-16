@@ -113,7 +113,7 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
     
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-oauth?action=get-auth-url`,
+        `/api/facebook-oauth.php?action=get-auth-url`,
         {
           headers: {
             Authorization: `Bearer ${session?.access_token}`,
@@ -165,7 +165,7 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
   const saveAndSelectPage = async (page: any) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-oauth?action=save-connection`,
+        `/api/facebook-oauth.php?action=save-connection`,
         {
           method: 'POST',
           headers: {
