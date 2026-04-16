@@ -1,47 +1,52 @@
 
 
-# MySQL Schema + Data Export
+# Fix MySQL Import for Shared Hosting (phpMyAdmin / MariaDB)
 
-## What I'll do
+## Problem
 
-Generate a complete MySQL `.sql` file that includes:
+The current `.sql` file fails because:
 
-1. **Schema** (CREATE TABLE statements) — same as before but refined
-2. **INSERT statements** with ALL actual data from every table
+1. **`CREATE DATABASE` not allowed** — shared hosting (cPanel) doesn't let you create databases via SQL. Your database `adsmpgco_Pagelyzer` already exists and was created via cPanel. The SQL tries to create `pagelyzer` which your user has no permission for.
+2. **`USE pagelyzer`** — wrong database name; yours is `adsmpgco_Pagelyzer`.
+3. **`DEFAULT (UUID())`** — MySQL 8.0+ syntax, but your host runs **MariaDB** (phpMyAdmin shows MariaDB), which doesn't support expression defaults like `(UUID())`.
+4. **Stored functions / DELIMITER** — phpMyAdmin often chokes on `DELIMITER //` blocks.
+5. **Timestamp format** — values like `'2026-02-01 16:04:19.558621+00'` have timezone offsets (`+00`) that MariaDB rejects.
 
-## Data included
+## What I'll generate
 
-| Table | Rows |
-|-------|------|
-| profiles | 13 |
-| plans | 4 |
-| user_roles | 13 |
-| audits | 78 |
-| audit_metrics | 66 |
-| fb_connections | 92 |
-| blog_posts | 33 |
-| subscriptions | 1 |
-| payments | 1 |
-| reports | 78 |
-| free_audit_grants | 8 |
-| settings | 13 |
-| page_seo | 10 |
-| audit_logs | 1 |
+### File 1: `pagelyzer_mariadb_schema.sql`
+- No `CREATE DATABASE` / `USE` statements
+- All `DEFAULT (UUID())` replaced with `DEFAULT NULL` + comment to generate UUIDs in app
+- No `DELIMITER` / stored functions / triggers (documented as comments)
+- Clean MariaDB 10.x compatible syntax
 
-Tables with 0 rows (organizations, scheduled_posts, content_calendar, audit_schedules, security_events) will have CREATE TABLE only.
+### File 2: `pagelyzer_mariadb_data.sql`
+- Only `INSERT INTO` statements
+- All timestamps stripped of `+00` timezone suffix
+- Properly escaped strings for MariaDB
+- Ready to import after schema file
 
-## Security note
+### File 3: `pagelyzer_mariadb_full.sql`
+- Combined single file (schema + data) for one-step import
 
-The settings table contains **sensitive data** (API keys, secrets). These will be included as-is since you requested all data. The output file will contain real credentials — handle it carefully.
+## Import instructions (included as comments in the files)
 
-## Steps
+```text
+1. Go to cPanel → phpMyAdmin
+2. Select database: adsmpgco_Pagelyzer
+3. Click "Import" tab
+4. Upload pagelyzer_mariadb_schema.sql first
+5. Then upload pagelyzer_mariadb_data.sql
+   (or just upload pagelyzer_mariadb_full.sql for everything at once)
+```
 
-1. Query all tables including JSONB columns (recommendations, score_breakdown, input_data, computed_metrics, raw_metrics, demographics, etc.)
-2. Convert PostgreSQL types → MySQL types (same mapping as before)
-3. Generate proper MySQL `INSERT INTO ... VALUES (...)` statements with escaped strings
-4. Write complete file to `/mnt/documents/pagelyzer_mysql_with_data.sql`
+## Key changes from previous file
 
-## Output
-
-Single `.sql` file with schema + all INSERT data, ready to import into any MySQL 8.0+ database.
+| Issue | Old | New |
+|-------|-----|-----|
+| DB creation | `CREATE DATABASE pagelyzer` | Removed |
+| UUID default | `DEFAULT (UUID())` | `DEFAULT NULL` |
+| Timestamps | `+00` suffix | Stripped |
+| Functions | `DELIMITER //` blocks | Comments only |
+| Engine | MySQL 8.0+ | MariaDB 10.x safe |
 
