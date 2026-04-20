@@ -198,42 +198,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      const response = await fetch(
-        `/api/check-subscription.php`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenToUse}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const { data, error: invokeError } = await supabase.functions.invoke('check-subscription');
 
-      if (response.ok) {
-        const data = await response.json();
+      if (!invokeError && data) {
         setSubscription(data);
-      } else if (response.status === 401 && retryCount < 2) {
-        // Token expired - try to refresh session
-        console.log('Token expired during request, attempting refresh...');
-        
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-        
-        if (refreshError || !refreshData.session) {
-          console.error('Failed to refresh session:', refreshError);
-          // Keep existing subscription if available, otherwise use default
-          if (!subscription) {
-            setSubscription(defaultSubscription);
+      } else {
+        const status = (invokeError as any)?.context?.status;
+        if (status === 401 && retryCount < 2) {
+          console.log('Token expired during request, attempting refresh...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+          if (refreshError || !refreshData.session) {
+            console.error('Failed to refresh session:', refreshError);
+            if (!subscription) {
+              setSubscription(defaultSubscription);
+            }
+            return;
           }
+          await fetchSubscription(refreshData.session.access_token, retryCount + 1);
           return;
         }
-        
-        // Retry with new token (recursive call with incremented retry count)
-        await fetchSubscription(refreshData.session.access_token, retryCount + 1);
-        return;
-      } else {
-        // Non-401 error - log but don't crash
-        const errorText = await response.text();
-        console.warn('Subscription check failed:', response.status, errorText);
-        
+        console.warn('Subscription check failed:', invokeError);
         if (!subscription) {
           setSubscription(defaultSubscription);
         }

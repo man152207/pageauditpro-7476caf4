@@ -29,22 +29,16 @@ export default function PublicReportPage() {
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['public-report', shareSlug],
     queryFn: async () => {
-      const response = await fetch(
-        `/api/get-public-report.php?slug=${shareSlug}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      const { data, error } = await supabase.functions.invoke(
+        `get-public-report?slug=${shareSlug}`,
+        { method: 'GET' }
       );
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to load report');
+      if (error) {
+        throw new Error((data as any)?.error || error.message || 'Failed to load report');
       }
 
-      return response.json();
+      return data;
     },
     enabled: !!shareSlug,
   });
