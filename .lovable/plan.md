@@ -1,97 +1,51 @@
 
-Root cause is clear: your frontend is calling `/api/*.php` and expecting JSON, but the live site is returning an HTML 404 page instead. That is why you see:
 
-```text
-Unexpected token '<', '<!doctype' ... is not valid JSON
-```
+## Problem
 
-I verified that these live URLs currently return the website’s 404 HTML, not API JSON:
+Audit fail हुनुको कारण: code मा backend calls अझै `/api/*.php` paths मा pointing छन् (जस्तै `/api/run-audit.php`, `/api/check-subscription.php`)। यी PHP endpoints exist गर्दैनन् — actual backend Supabase Edge Functions हुन्। SPA fallback ले `index.html` return गर्छ, जसले `<!doctype` शुरु हुने HTML दिन्छ → JSON parse fail → "Unexpected token '<'" error।
 
-```text
-https://pagelyzer.io/api/auth.php
-https://pagelyzer.io/api/data.php
-https://pagelyzer.io/api/check-subscription.php
-https://pagelyzer.io/api/facebook-auth-login.php
-```
+यो पहिले `client.ts` fix गरेको issue (PHP backend conversion attempt) को बाँकी अंश हो।
 
-So the problem is not the login form itself first — the PHP API is not reachable at the path the frontend uses.
+## Affected Files (4)
 
-## What I will fix next
+1. `src/hooks/useAudits.ts` — `useAudit` (line 62), `useRunAudit` (line 172)
+2. `src/contexts/AuthContext.tsx` — `fetchSubscription` (line 202)
+3. `src/components/audit/AuditFlow.tsx` — `handleConnect` (line 116), `saveAndSelectPage` (line 168)
+4. `src/pages/PublicReportPage.tsx` — public report fetch (line 33)
 
-1. Inspect the cPanel-ready package structure and make sure the ZIP extracts like this:
-   ```text
-   pagelyzer.io/
-   ├── index.html
-   ├── assets/
-   ├── .htaccess
-   ├── api/
-   │   ├── auth.php
-   │   ├── data.php
-   │   ├── check-subscription.php
-   │   ├── facebook-auth-login.php
-   │   └── ...
-   ```
-   Not inside an extra nested folder.
+## Fix Strategy
 
-2. Regenerate the package so Apache routing cannot swallow missing API files silently:
-   - keep SPA fallback for React routes
-   - explicitly preserve `/api/*.php`
-   - ensure `.php` requests never fall through to `index.html`
-
-3. Add safer frontend API handling:
-   - detect non-JSON responses before calling `response.json()`
-   - show a real message like:
-     ```text
-     API endpoint not found at /api/auth.php
-     ```
-     instead of the raw `Unexpected token '<'` error
-
-4. Recheck auth flow compatibility:
-   - email login → `/api/auth.php?action=login`
-   - session restore → `/api/auth.php?action=session`
-   - refresh → `/api/auth.php?action=refresh`
-   - Facebook login → `/api/facebook-auth-login.php`
-
-5. Produce a new cPanel package with corrected structure and routing so after upload/extract the API works immediately.
-
-## Most likely deployment mistake right now
-
-One of these is happening on the server:
-
-- the ZIP extracted into an extra subfolder, so real path became:
-  ```text
-  /home/adsmpgco/pagelyzer.io/pagelyzer_cpanel_ready_v2/api/auth.php
-  ```
-  instead of:
-  ```text
-  /home/adsmpgco/pagelyzer.io/api/auth.php
-  ```
-
-- or `.htaccess` is redirecting missing `/api/*.php` requests to `index.html`
-- or the API files were uploaded to a different root than the live domain
-
-## Technical note
-
-Because the browser receives HTML like:
-
-```html
-<!doctype html>...
-```
-
-the wrapper in `src/integrations/supabase/client.ts` fails at:
+सबै `fetch('/api/xxx.php', ...)` calls लाई Supabase client invoke मा convert गर्ने:
 
 ```ts
+// Before
+const response = await fetch(`/api/run-audit.php`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${session.access_token}`, ... },
+  body: JSON.stringify({ connection_id, date_range }),
+});
 const data = await response.json();
+
+// After
+const { data, error } = await supabase.functions.invoke('run-audit', {
+  body: { connection_id, date_range },
+});
+if (error) throw new Error(getEdgeFunctionHumanMessage(error, data, 'Failed to run audit'));
 ```
 
-So both email login and Facebook login can fail with the same symptom.
+Mappings:
+- `/api/run-audit.php` → `supabase.functions.invoke('run-audit')`
+- `/api/check-subscription.php` → `supabase.functions.invoke('check-subscription')`
+- `/api/get-audit-report.php?audit_id=X` → `invoke('get-audit-report', { body: { audit_id } })` (or query via `?` in path)
+- `/api/facebook-oauth.php?action=get-auth-url` → `invoke('facebook-oauth', { body: { action: 'get-auth-url' } })`
+- `/api/facebook-oauth.php?action=save-connection` → `invoke('facebook-oauth', { body: { action: 'save-connection', ... } })`
+- `/api/get-public-report.php?slug=X` → `invoke('get-public-report', { body: { slug } })`
 
-## Deliverable after approval
+Auth token automatically attaches via Supabase client — manual `Authorization` header हटाउने। Error handling मा existing `getEdgeFunctionHumanMessage` helper प्रयोग गर्ने।
 
-I will prepare a new package that is safer and truly upload-ready for cPanel:
-- corrected folder layout
-- corrected `.htaccess`
-- corrected API path handling
-- clearer frontend error handling for bad API responses
-- updated ZIP for direct extract in `pagelyzer.io/`
+## Notes
+
+- `AuthContext.tsx` को proactive token refresh logic (5-min expiry check) रहन्छ — Supabase client ले session manage गर्छ।
+- Public report (`PublicReportPage`) मा session चाहिँदैन — anonymous invoke सहि छ।
+- कुनै edge function signature change गर्नु पर्दैन; ती already deployed र working छन्।
 
