@@ -112,19 +112,12 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
     setConnecting(true);
     
     try {
-      const response = await fetch(
-        `/api/facebook-oauth.php?action=get-auth-url`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-        }
-      );
-      
-      const result = await response.json();
-      
-      if (result.error) {
-        throw new Error(result.error);
+      const { data: result, error } = await supabase.functions.invoke('facebook-oauth', {
+        body: { action: 'get-auth-url' },
+      });
+
+      if (error || result?.error) {
+        throw new Error(result?.error || error?.message || 'Failed to get auth URL');
       }
 
       // Open popup for OAuth
@@ -164,26 +157,17 @@ export function AuditFlow({ onComplete }: AuditFlowProps) {
 
   const saveAndSelectPage = async (page: any) => {
     try {
-      const response = await fetch(
-        `/api/facebook-oauth.php?action=save-connection`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            page_id: page.id,
-            page_name: page.name,
-            access_token: page.access_token,
-          }),
-        }
-      );
+      const { data: result, error } = await supabase.functions.invoke('facebook-oauth', {
+        body: {
+          action: 'save-connection',
+          page_id: page.id,
+          page_name: page.name,
+          access_token: page.access_token,
+        },
+      });
 
-      const result = await response.json();
-
-      if (result.error) {
-        throw new Error(result.error);
+      if (error || result?.error) {
+        throw new Error(result?.error || error?.message || 'Failed to save connection');
       }
 
       toast({

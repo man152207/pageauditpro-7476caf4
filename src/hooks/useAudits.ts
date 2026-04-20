@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { getEdgeFunctionHumanMessage } from '@/lib/edgeFunctionError';
 
 export interface Audit {
   id: string;
@@ -58,22 +59,16 @@ export function useAudit(auditId: string | undefined) {
       if (!auditId || !session) return null;
 
       // Call edge function with query param for gated report data
-      const response = await fetch(
-        `/api/get-audit-report.php?audit_id=${auditId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      const { data, error } = await supabase.functions.invoke(
+        `get-audit-report?audit_id=${auditId}`,
+        { method: 'GET' }
       );
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to fetch audit');
+      if (error) {
+        throw new Error(getEdgeFunctionHumanMessage(error, data, 'Failed to fetch audit'));
       }
 
-      return await response.json();
+      return data;
     },
     enabled: !!auditId && !!user && !!session,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -168,30 +163,25 @@ export function useRunAudit() {
       const connectionId = typeof params === 'string' ? params : params.connectionId;
       const dateRange = typeof params === 'string' ? undefined : params.dateRange;
 
-      const response = await fetch(
-        `/api/run-audit.php`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            connection_id: connectionId,
-            date_range: dateRange,
-          }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('run-audit', {
+        body: {
+          connection_id: connectionId,
+          date_range: dateRange,
+        },
+      });
 
-      if (!response.ok) {
-        const errData = await response.json();
-        const err = new Error(errData.human_message || errData.error || 'Failed to run audit');
-        (err as any).code = errData.error;
-        (err as any).fix_steps = errData.fix_steps;
+      if (error) {
+        const msg = getEdgeFunctionHumanMessage(error, data, 'Failed to run audit');
+        const err = new Error(msg);
+        const errData = (data as any)?.error;
+        if (errData) {
+          (err as any).code = errData;
+          (err as any).fix_steps = (data as any)?.fix_steps;
+        }
         throw err;
       }
 
-      return await response.json();
+      return data;
     },
     onSuccess: (data) => {
       toast({
