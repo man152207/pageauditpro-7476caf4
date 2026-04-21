@@ -7,9 +7,9 @@
   # These require mod_proxy to be enabled
   # ============================================
   
-  # Sitemap - proxy to edge function (real-time)
-  RewriteRule ^sitemap\.xml$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/sitemap [P,L]
-  
+  # Sitemap is generated at build time as a static file (dist/sitemap.xml)
+  # LiteSpeed does not reliably support [P] proxy flag, so no proxy rule here.
+
   # Stripe Webhook - proxy to edge function
   RewriteRule ^api/webhooks/stripe$ https://wrjqheztddmazlifbzbi.supabase.co/functions/v1/stripe-webhook [P,L]
   
